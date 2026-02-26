@@ -1,0 +1,31 @@
+{
+  "name": "learnlog",
+  "version": "1.0.0",
+  "description": "a web application designed to give students a dedicated space to write, share, and reflect on what they're learning",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev -w frontend",
+    "dev:backend": "npm run dev -w backend",
+    "build:frontend": "npm run build -w frontend",
+    "build:backend": "npm run build -w backend",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UndergradMartinC/LearnLog.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/UndergradMartinC/LearnLog/issues"
+  },
+  "homepage": "https://github.com/UndergradMartinC/LearnLog#readme"
+}

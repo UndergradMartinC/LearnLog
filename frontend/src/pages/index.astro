@@ -1,0 +1,27 @@
+---
+
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Astro</title>
+	</head>
+	<body>
+		<h1>Astro</h1>
+		<button id="health-btn">Click Me</button>
+		<p id="health-msg"></p>
+
+		<script>
+			document.getElementById('health-btn')!.addEventListener('click', async () => {
+				const res = await fetch('http://localhost:3000/api/users/health')
+				const data = await res.json()
+				document.getElementById('health-msg')!.textContent = data.message
+			})
+		</script>
+	</body>
+</html>
