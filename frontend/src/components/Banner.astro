@@ -1,0 +1,28 @@
+---
+import Nav from '../components/Nav.astro'
+
+const bannerY = 38;
+---
+
+<style>
+  .banner {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .banner img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center var(--banner-y);
+  }
+</style>
+
+<div class="banner" style={`--banner-y: ${bannerY}%;`}>
+  <img src="/images/banner.png" alt="LearnLog banner" />
+</div>
+
+<Nav />

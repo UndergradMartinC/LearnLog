@@ -1,0 +1,43 @@
+---
+// The `import.meta.glob` call will be resolved at build time; it returns
+// an object whose keys are paths to the matching modules.  We use it to
+// generate a list of links without hardcoding each page.
+
+const modules = import.meta.glob('../pages/*.astro', { eager: true });
+
+// Build a simple array of { href, label } objects.  Skip index because it
+// is represented by `/`.
+const links = Object.keys(modules)
+  .map((file) => {
+    const name = file.split('/').pop().replace(/\.astro$/, '');
+    const href = name === 'index' ? '/' : `/${name}`;
+    const label = name === 'index' ? 'Home' : name.replace(/-/g, ' ');
+    return { href, label };
+  })
+  .filter((l) => l.href !== undefined);
+---
+
+<nav class="nav">
+  <ul>
+    {links.map((l) => (
+      <li><a href={l.href}>{l.label}</a></li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+.nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 1rem;
+}
+.nav a {
+  text-decoration: none;
+  color: inherit;
+}
+.nav a:hover {
+  text-decoration: underline;
+}
+</style>
