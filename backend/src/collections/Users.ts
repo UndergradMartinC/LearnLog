@@ -16,6 +16,24 @@ export const Users: CollectionConfig = {
       name: 'bio',
       type: 'textarea',
     },
+    {
+      name: 'role',
+      type: 'select',
+      options: [
+        {
+          label: 'Admin',
+          value: 'admin',
+        },
+        {
+          label: 'None',
+          value: 'none',
+        },
+      ],
+      defaultValue: 'none',
+      admin: {
+        description: 'Set to admin to grant administrative privileges. Default is "none" for regular users.',
+      },
+    },
   ],
   endpoints: [
     {
