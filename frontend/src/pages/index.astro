@@ -1,29 +1,286 @@
 ---
-import Banner from '../components/Banner.astro'
+const title = "LearnLog";
 ---
 
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<Banner>
-		</Banner>
-		<h1>Astro</h1>
-		<button id="health-btn">Click Me</button>
-		<p id="health-msg"></p>
+<head>
+<meta charset="UTF-8" />
+<title>{title}</title>
 
-		<script>
-			document.getElementById('health-btn')!.addEventListener('click', async () => {
-				const res = await fetch('http://localhost:3000/api/users/health')
-				const data = await res.json()
-				document.getElementById('health-msg')!.textContent = data.message
-			})
-		</script>
-	</body>
+<style>
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: #f8fafc;
+  color: #333;
+}
+
+a {
+  text-decoration: none;
+}
+
+/* NAVBAR */
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 40px;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+  color: #2563eb;
+}
+
+.nav-links a {
+  margin-left: 20px;
+  color: #333;
+  font-weight: 500;
+}
+
+.signup-btn {
+  background: #10b981;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+}
+
+/* HERO */
+
+.hero {
+  text-align: center;
+  padding: 140px 20px;
+  color: white;
+  background: linear-gradient(135deg,#2563eb,#7c3aed);
+}
+
+.hero h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  font-size: 18px;
+  max-width: 600px;
+  margin: auto;
+  opacity: 0.9;
+}
+
+.hero-buttons {
+  margin-top: 30px;
+}
+
+.btn {
+  padding: 12px 24px;
+  border-radius: 6px;
+  margin: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  color: white;
+}
+
+.login {
+  background: #3b82f6;
+}
+
+.signup {
+  background: #10b981;
+}
+
+/* FEATURES */
+
+.features {
+  padding: 80px 40px;
+  text-align: center;
+  background: #f8fafc;
+}
+
+.feature-grid {
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 30px;
+}
+
+.feature-card {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  transition: transform 0.2s;
+}
+
+.feature-card:hover {
+  transform: translateY(-6px);
+}
+
+/* POSTS */
+
+.posts {
+  padding: 80px 40px;
+  text-align: center;
+  background: white;
+}
+
+.post-grid {
+  margin-top: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
+  gap: 25px;
+}
+
+.post-card {
+  background: #f1f5f9;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+/* CTA */
+
+.cta {
+  background: linear-gradient(135deg,#2563eb,#10b981);
+  color: white;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+/* FOOTER */
+
+.footer {
+  background: #111827;
+  color: white;
+  padding: 30px;
+  text-align: center;
+  font-size: 14px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<nav class="navbar">
+
+<div class="logo">LearnLog</div>
+
+<div class="nav-links">
+<a href="#">Features</a>
+<a href="#">Explore</a>
+<a href="#">About</a>
+<a href="/login">Login</a>
+<a class="signup-btn" href="/signup">Sign Up</a>
+</div>
+
+</nav>
+
+<!-- HERO -->
+
+<section class="hero">
+
+<h1>Track What You Learn</h1>
+
+<p>
+LearnLog is a platform where students and developers
+document their learning journey, share insights,
+and build a portfolio of knowledge over time.
+</p>
+
+<div class="hero-buttons">
+<a class="btn login" href="/login">Login</a>
+<a class="btn signup" href="/signup">Create Account</a>
+</div>
+
+</section>
+
+<!-- FEATURES -->
+
+<section class="features">
+
+<h2>Why Use LearnLog?</h2>
+
+<div class="feature-grid">
+
+<div class="feature-card">
+<h3>📚 Write Learning Logs</h3>
+<p>Create posts documenting what you learn every day.</p>
+</div>
+
+<div class="feature-card">
+<h3>📈 Track Progress</h3>
+<p>Build a timeline showing your learning journey.</p>
+</div>
+
+<div class="feature-card">
+<h3>🌎 Share Knowledge</h3>
+<p>Publish insights and help other learners grow.</p>
+</div>
+
+<div class="feature-card">
+<h3>🧠 Build Your Portfolio</h3>
+<p>Show employers how you continuously improve.</p>
+</div>
+
+</div>
+
+</section>
+
+<!-- POSTS -->
+
+<section class="posts">
+
+<h2>Recent Learning Logs</h2>
+
+<div class="post-grid">
+
+<div class="post-card">
+<h4>Understanding Binary Search Trees</h4>
+<p>A deep dive into BST operations and complexity.</p>
+</div>
+
+<div class="post-card">
+<h4>Learning Docker Containers</h4>
+<p>How containers help deploy software consistently.</p>
+</div>
+
+<div class="post-card">
+<h4>Mastering Dynamic Programming</h4>
+<p>Breaking down complex problems into smaller ones.</p>
+</div>
+
+</div>
+
+</section>
+
+<!-- CTA -->
+
+<section class="cta">
+
+<h2>Start Your Learning Journey Today</h2>
+
+<p>Join LearnLog and document what you learn every day.</p>
+
+<div class="hero-buttons">
+<a class="btn signup" href="/signup">Create Your Account</a>
+</div>
+
+</section>
+
+<!-- FOOTER -->
+
+<footer class="footer">
+
+<p>© 2026 LearnLog</p>
+<p>Built by UL Lafayette CS Students</p>
+
+</footer>
+
+</body>
 </html>
