@@ -1,0 +1,126 @@
+---
+export const prerender = true;
+const title = "Sign in | LearnLog";
+---
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>{title}</title>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, Helvetica, sans-serif; margin: 0; background: #f8fafc; color: #333; }
+
+.navbar { display:flex; justify-content:space-between; align-items:center; padding:18px 40px; background:white; box-shadow:0 2px 6px rgba(0,0,0,0.08); position:relative; z-index:10; }
+.logo { font-size:22px; font-weight:bold; color:#2563eb; }
+.nav-links a { margin-left:20px; color:#333; font-weight:500; }
+
+.main-container { display:flex; justify-content:center; align-items:center; height:calc(100vh - 70px); }
+
+.login-card { width:900px; height:700px; background:white; border-radius:18px; overflow:hidden; display:flex; box-shadow:0 25px 50px rgba(0,0,0,0.18); }
+.user-icon { margin-bottom:20px; }
+
+.form-side { flex:1; padding:60px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
+.form-side h2 { margin-bottom:25px; font-size:32px; }
+.form-side form { width:100%; max-width:350px; }
+.input { margin-bottom:18px; }
+input { width:100%; padding:12px 14px; border-radius:8px; border:1px solid #e5e7eb; font-size:14px; }
+.login-btn { background:#6c63ff; color:white; border:none; padding:12px; border-radius:10px; font-size:16px; cursor:pointer; width:100%; margin-bottom:15px; }
+.error-msg { color:#dc2626; font-size:14px; margin-bottom:12px; min-height:20px; }
+.bottom-text { font-size:14px; margin-top:10px; color:#666; }
+.bottom-text a { color:#5b5bd6; font-weight:600; }
+
+.visual-side { flex:1; background:linear-gradient(135deg, #3b5bdb, #7c3aed); border-radius:0 18px 18px 0; display:flex; justify-content:center; align-items:center; overflow:hidden; }
+
+@media (max-width: 800px) {
+  .main-container { height:auto; padding:20px 0; }
+  .login-card { width:90%; height:auto; flex-direction:column; border-radius:18px; }
+  .form-side, .visual-side { flex:none; width:100%; padding:30px 20px; border-radius:18px; }
+}
+
+.footer { background:#111827; color:white; padding:30px; text-align:center; font-size:14px; }
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="logo">LearnLog</div>
+  <div class="nav-links">
+    <a href="#">Features</a>
+    <a href="#">Explore</a>
+    <a href="#">About</a>
+  </div>
+</nav>
+
+<!-- CENTERED LOGIN CARD -->
+<div class="main-container">
+  <div class="login-card">
+
+    <!-- LEFT FORM SIDE -->
+    <div class="form-side">
+
+      <div class="user-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="#6c63ff" viewBox="0 0 16 16">
+          <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+        </svg>
+      </div>
+
+      <h2>Sign In</h2>
+
+      <form id="login-form">
+        <div class="input">
+          <input type="email" id="email" placeholder="Email address" required>
+        </div>
+        <div class="input">
+          <input type="password" id="password" placeholder="Password" required>
+        </div>
+        <p class="error-msg" id="error-msg"></p>
+        <button class="login-btn" type="submit">Sign In</button>
+      </form>
+
+      <div class="bottom-text">
+        Don't have an account? <a href="/signup">Sign up</a>
+      </div>
+
+    </div>
+
+    <!-- RIGHT VISUAL SIDE -->
+    <div class="visual-side">
+      <!-- colored gradient block -->
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>© 2026 LearnLog</p>
+  <p>Built by UL Lafayette CS Students</p>
+</footer>
+
+<script>
+  import { signIn } from '../lib/auth';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('login-form')!.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = (document.getElementById('email') as HTMLInputElement).value;
+      const password = (document.getElementById('password') as HTMLInputElement).value;
+      const errorMsg = document.getElementById('error-msg')!;
+
+      errorMsg.textContent = '';
+      try {
+        await signIn({ email, password });
+        window.location.href = '/dashboard';
+      } catch (err: any) {
+        errorMsg.textContent = 'Invalid email or password.';
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

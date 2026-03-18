@@ -5,7 +5,16 @@ export const Users: CollectionConfig = {
   admin: {
     useAsTitle: 'email',
   },
-  auth: true,
+  auth: {
+    cookies: {
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Lax',
+      domain: process.env.COOKIE_DOMAIN || 'localhost',
+    },
+  },
+  access: {
+    create: () => true,
+  },
   fields: [
     // Email added by default
     {
