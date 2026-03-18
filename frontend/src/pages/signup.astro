@@ -7,9 +7,6 @@ const title = "Sign up | LearnLog";
 <meta charset="UTF-8" />
 <title>{title}</title>
 
-<!-- Supabase JS -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: Arial, Helvetica, sans-serif; margin: 0; background: #f8fafc; color: #333; }
@@ -104,42 +101,21 @@ input { width:100%; padding:12px 14px; border-radius:8px; border:1px solid #e5e7
   <p>Built by UL Lafayette CS Students</p>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // Initialize Supabase
-  const supabaseUrl = 'https://epmtoywrjjiezdyqrpxq.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwbXRveXdyamppZXpkeXFycHhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNDU3NDMsImV4cCI6MjA4ODgyMTc0M30.HiEHoOee9NduXXfcObxtN_J27-iRkJmyJKp3GO5oXnM'; // <-- replace with your public anon key
-  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  import { signUp } from '../lib/auth';
 
   document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('signup-form');
-
-    form.addEventListener('submit', async (e) => {
+    document.getElementById('signup-form')!.addEventListener('submit', async (e) => {
       e.preventDefault();
-
-      const fullName = document.getElementById('fullName').value;
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      const name = (document.getElementById('fullName') as HTMLInputElement).value;
+      const email = (document.getElementById('email') as HTMLInputElement).value;
+      const password = (document.getElementById('password') as HTMLInputElement).value;
 
       try {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            // This is user_metadata in Supabase v2
-            data: { full_name: fullName }
-          }
-        });
-
-        console.log(data, error); // debug
-        if (error) {
-          alert('Error: ' + error.message);
-        } else {
-          alert('Account created! Please check your email to confirm.');
-        }
-      } catch (err) {
-        console.error(err);
-        alert('Something went wrong.');
+        await signUp({ email, password, name });
+        alert('Account created! You can now sign in.');
+      } catch (err: any) {
+        alert('Error: ' + err.message);
       }
     });
   });
