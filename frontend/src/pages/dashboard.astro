@@ -1,4 +1,15 @@
 ---
+const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL ?? 'http://localhost:3000';
+const cookie = Astro.request.headers.get('cookie') ?? '';
+
+const res = await fetch(`${PAYLOAD_URL}/api/users/me`, {
+  headers: { cookie },
+});
+
+if (!res.ok) {
+  return Astro.redirect('/login');
+}
+
 const title = "Dashboard | LearnLog";
 ---
 
@@ -54,15 +65,9 @@ body { font-family: Arial, Helvetica, sans-serif; margin: 0; background: #f8fafc
 </footer>
 
 <script>
-  import { getMe, signOut } from '../lib/auth';
+  import { signOut } from '../lib/auth';
 
-  document.addEventListener('DOMContentLoaded', async () => {
-    try {
-      await getMe();
-    } catch {
-      window.location.href = '/login';
-    }
-
+  document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('logout-btn')!.addEventListener('click', async () => {
       await signOut();
       window.location.href = '/login';
