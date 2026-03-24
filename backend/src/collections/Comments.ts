@@ -5,6 +5,22 @@ export const Comments: CollectionConfig = {
   admin: {
     defaultColumns: ['body', 'author', 'post'],
   },
+  access: {
+    create: ({ req }) => Boolean(req.user),
+  },
+  hooks: {
+    beforeValidate: [
+      ({ data, operation, req }) => {
+        if (operation !== 'create') return data
+        if (!req.user) return data
+
+        return {
+          ...data,
+          author: req.user.id,
+        }
+      },
+    ],
+  },
   fields: [
     {
       name: 'body',
