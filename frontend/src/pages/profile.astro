@@ -1,0 +1,333 @@
+---
+const title = "Profile - LearnLog";
+---
+
+<html>
+<head>
+<meta charset="UTF-8">
+<title>{title}</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #f5f5f5;
+}
+
+/* ================= NAVBAR ================= */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background: white;
+  border-bottom: 1px solid #eee;
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 18px;
+  color: #2563eb;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.nav-right a {
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+}
+
+.nav-right a:hover {
+  color: #7c3aed;
+}
+
+.nav-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #7c3aed;
+}
+
+.nav-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ================= COVER ================= */
+.cover {
+  height: 260px;
+  background: linear-gradient(90deg, #2563eb, #7c3aed);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 60px;
+  color: white;
+}
+
+.profile-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.name-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.name {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+/* ================= BUTTON ================= */
+.edit-btn, .save-btn {
+  margin-top: 10px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.edit-btn {
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  color: white;
+}
+
+.save-btn {
+  background: linear-gradient(135deg, #22c55e, #15803d);
+  color: white;
+}
+
+/* ================= AVATAR ================= */
+.avatar {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  border: 4px solid white;
+  overflow: hidden;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ================= MAIN ================= */
+.container {
+  padding: 40px;
+}
+
+.section-title {
+  text-align: center;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.card {
+  background: #e5e7eb;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+/* CENTER TEXT */
+.card strong {
+  display: block;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.card p {
+  text-align: center;
+}
+
+input {
+  width: 100%;
+  padding: 6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+  <div class="logo">LearnLog</div>
+
+  <div class="nav-right">
+    <a href="#">Features</a>
+    <a href="#">Explore</a>
+    <a href="#">About</a>
+
+    <div class="nav-profile">
+      <span id="navName"></span>
+      <div class="nav-avatar">
+        <img id="navImage" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cover">
+  <div class="profile-row">
+
+    <div class="name-section">
+      <div id="username" class="name"></div>
+      <div id="editControls"></div>
+    </div>
+
+    <div class="avatar">
+      <img id="profileImage" />
+    </div>
+
+  </div>
+</div>
+
+<div class="container">
+
+<h2 class="section-title">About</h2>
+
+<div class="cards">
+  <div class="card">
+    <strong>Bio</strong>
+    <p id="bioText"></p>
+  </div>
+
+  <div class="card">
+    <strong>Major</strong>
+    <p id="majorText"></p>
+  </div>
+
+  <div class="card">
+    <strong>School</strong>
+    <p id="schoolText"></p>
+  </div>
+</div>
+
+<h2 class="section-title">Recent Learning Logs</h2>
+
+<div class="cards">
+  <div class="card">
+    <strong>Understanding Binary Search Trees</strong>
+    <p>Example log</p>
+  </div>
+
+  <div class="card">
+    <strong>Learning Docker Containers</strong>
+    <p>Containers help deploy apps</p>
+  </div>
+
+  <div class="card">
+    <strong>Mastering Dynamic Programming</strong>
+    <p>Breaking problems into subproblems</p>
+  </div>
+</div>
+
+</div>
+
+<script>
+
+/* ===== FORCE GENERIC NAME ===== */
+localStorage.setItem("username", "Your Name");
+
+/* ===== AUTH ===== */
+const isLoggedIn = true;
+const loggedInUserId = "123";
+const profileUserId = "123";
+const canEdit = isLoggedIn && loggedInUserId === profileUserId;
+
+/* ===== USER DATA ===== */
+let currentUser = {
+  username: "Your Name",
+  profileImage: localStorage.getItem("profileImage") || ""
+};
+
+/* ===== LOAD PROFILE ===== */
+function loadProfile() {
+  document.getElementById("username").textContent = currentUser.username;
+  document.getElementById("navName").textContent = currentUser.username;
+
+  document.getElementById("bioText").textContent =
+    localStorage.getItem("bio") || "Add a bio...";
+
+  document.getElementById("majorText").textContent =
+    localStorage.getItem("major") || "Not set";
+
+  document.getElementById("schoolText").textContent =
+    localStorage.getItem("school") || "Not set";
+
+  if (currentUser.profileImage) {
+    document.getElementById("profileImage").src = currentUser.profileImage;
+    document.getElementById("navImage").src = currentUser.profileImage;
+  }
+}
+
+/* ===== BUTTON ===== */
+function loadEditControls() {
+  if (!canEdit) return;
+
+  document.getElementById("editControls").innerHTML = `
+    <button class="edit-btn" onclick="enterEditMode()">Edit Profile</button>
+  `;
+}
+
+/* ===== EDIT ===== */
+function enterEditMode() {
+  document.getElementById("editControls").innerHTML = `
+    <button class="save-btn" onclick="saveProfile()">Save</button>
+  `;
+
+  makeInput("username", currentUser.username);
+  makeInput("bioText", localStorage.getItem("bio") || "");
+  makeInput("majorText", localStorage.getItem("major") || "");
+  makeInput("schoolText", localStorage.getItem("school") || "");
+}
+
+/* ===== HELPER ===== */
+function makeInput(id, value) {
+  const el = document.getElementById(id);
+  const input = document.createElement("input");
+  input.value = value;
+  input.id = id;
+  el.replaceWith(input);
+}
+
+/* ===== SAVE ===== */
+function saveProfile() {
+  localStorage.setItem("username", "Your Name"); // force generic
+  localStorage.setItem("bio", document.getElementById("bioText").value);
+  localStorage.setItem("major", document.getElementById("majorText").value);
+  localStorage.setItem("school", document.getElementById("schoolText").value);
+
+  location.reload();
+}
+
+/* ===== INIT ===== */
+loadProfile();
+loadEditControls();
+
+</script>
+
+</body>
+</html>
