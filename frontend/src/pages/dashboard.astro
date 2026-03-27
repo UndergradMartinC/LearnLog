@@ -112,6 +112,7 @@ body {
   text-decoration: none;
   color: inherit;
   display: block;
+  height: 100%;
 }
 .post-card {
   background: var(--color-surface);
@@ -120,6 +121,7 @@ body {
   padding: 1.5rem;
   display: flex; flex-direction: column; gap: 0.625rem;
   transition: border-color 0.15s, box-shadow 0.15s;
+  height: 100%;
 }
 .post-link:hover .post-card {
   border-color: #b8b4ac;
@@ -142,7 +144,8 @@ body {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
   display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;
-  margin-top: 0.25rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
   font-variant-numeric: tabular-nums;
 }
 
