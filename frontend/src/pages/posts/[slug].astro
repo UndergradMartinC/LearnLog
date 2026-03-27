@@ -1,0 +1,304 @@
+---
+const { slug } = Astro.params;
+const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL ?? 'http://localhost:3000';
+const cookie = Astro.request.headers.get('cookie') ?? '';
+
+const authRes = await fetch(`${PAYLOAD_URL}/api/users/me`, { headers: { cookie } });
+if (!authRes.ok) return Astro.redirect('/login');
+
+const postRes = await fetch(
+  `${PAYLOAD_URL}/api/posts?where[slug][equals]=${slug}&depth=1`,
+  { headers: { cookie } }
+);
+if (!postRes.ok) return Astro.redirect('/dashboard');
+const postData = await postRes.json();
+const post = postData.docs?.[0];
+if (!post) return Astro.redirect('/dashboard');
+
+// Lexical rich text → HTML serializer
+function renderNodes(nodes: any[]): string {
+  return (nodes ?? []).map(renderNode).join('');
+}
+
+function renderNode(node: any): string {
+  switch (node.type) {
+    case 'paragraph':
+      return `<p>${renderNodes(node.children)}</p>`;
+    case 'heading':
+      return `<${node.tag}>${renderNodes(node.children)}</${node.tag}>`;
+    case 'text': {
+      let t = node.text ?? '';
+      if (node.format & 1)  t = `<strong>${t}</strong>`;
+      if (node.format & 2)  t = `<em>${t}</em>`;
+      if (node.format & 8)  t = `<u>${t}</u>`;
+      if (node.format & 16) t = `<s>${t}</s>`;
+      return t;
+    }
+    case 'link':
+      return `<a href="${node.url ?? '#'}">${renderNodes(node.children)}</a>`;
+    case 'list':
+      return node.listType === 'number'
+        ? `<ol>${renderNodes(node.children)}</ol>`
+        : `<ul>${renderNodes(node.children)}</ul>`;
+    case 'listitem':
+      return `<li>${renderNodes(node.children)}</li>`;
+    case 'quote':
+      return `<blockquote>${renderNodes(node.children)}</blockquote>`;
+    case 'linebreak':
+      return '<br>';
+    default:
+      return renderNodes(node.children ?? []);
+  }
+}
+
+let bodyHtml = '';
+if (typeof post.body === 'string') {
+  // Plain string — escape and wrap in a paragraph
+  bodyHtml = `<p>${post.body.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`;
+} else if (post.body?.root?.children) {
+  // Lexical JSON (created via admin rich-text editor)
+  bodyHtml = renderNodes(post.body.root.children);
+}
+const postDate = post.publishedAt ?? post.createdAt;
+const authorName = post.author?.name ?? post.author?.email ?? 'Unknown';
+const title = `${post.title} | LearnLog`;
+---
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>{title}</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-serif: 'Lora', Georgia, serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+
+  --text-xs:   0.6875rem;
+  --text-sm:   0.8125rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.75rem;
+  --text-2xl:  2.25rem;
+
+  --color-bg:         #f7f6f3;
+  --color-surface:    #ffffff;
+  --color-border:     #e4e2db;
+  --color-text:       #2d2d2d;
+  --color-text-2:     #5e6278;
+  --color-text-muted: #9090a0;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-kerning: normal;
+  -webkit-font-smoothing: antialiased;
+}
+
+.navbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.125rem 2.5rem;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  position: relative; z-index: 10;
+}
+.logo {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+.nav-links a {
+  margin-left: 1.25rem;
+  color: var(--color-text-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: none;
+}
+.logout-btn {
+  margin-left: 1.25rem;
+  background: var(--color-text);
+  color: var(--color-surface);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+}
+
+/* Post layout */
+.post-container {
+  max-width: 42rem;
+  margin: 3rem auto;
+  padding: 0 1.5rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  margin-bottom: 2.5rem;
+}
+.back-link:hover { color: var(--color-text-2); }
+
+/* Post header */
+.post-header { margin-bottom: 2.5rem; }
+
+.post-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+
+.post-deck {
+  font-size: var(--text-lg);
+  color: var(--color-text-2);
+  line-height: 1.55;
+  margin-bottom: 1.25rem;
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+.post-meta {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.badge {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.badge-published { background: #ecfdf5; color: #16a34a; }
+.badge-draft     { background: #fefce8; color: #a16207; }
+
+/* Prose (rendered rich text) */
+.prose {
+  font-family: var(--font-serif);
+  font-size: var(--text-base);
+  line-height: 1.8;
+  color: var(--color-text);
+  max-width: 65ch;
+}
+.prose p { margin-bottom: 1.25rem; }
+.prose h1, .prose h2, .prose h3,
+.prose h4, .prose h5, .prose h6 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  margin: 2rem 0 0.75rem;
+}
+.prose h1 { font-size: 1.75rem; }
+.prose h2 { font-size: 1.375rem; }
+.prose h3 { font-size: 1.125rem; }
+.prose ul, .prose ol { padding-left: 1.5rem; margin-bottom: 1.25rem; }
+.prose li { margin-bottom: 0.375rem; }
+.prose blockquote {
+  border-left: 3px solid var(--color-border);
+  padding-left: 1.25rem;
+  margin: 1.5rem 0;
+  color: var(--color-text-2);
+  font-style: italic;
+}
+.prose a { color: #2563eb; text-underline-offset: 3px; }
+.prose strong { font-weight: 600; }
+
+.no-body {
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-family: var(--font-serif);
+}
+
+.footer {
+  background: #1c1c1e;
+  color: #a8a8b8;
+  padding: 1.875rem;
+  text-align: center;
+  font-size: var(--text-sm);
+  line-height: 1.8;
+  margin-top: 4rem;
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="/dashboard" class="logo">LearnLog</a>
+  <div class="nav-links">
+    <a href="#">Features</a>
+    <a href="#">Explore</a>
+    <a href="#">About</a>
+    <button class="logout-btn" id="logout-btn">Logout</button>
+  </div>
+</nav>
+
+<!-- POST -->
+<article class="post-container">
+  <a href="/dashboard" class="back-link">← All Posts</a>
+
+  <header class="post-header">
+    <h1 class="post-title">{post.title}</h1>
+    {post.deck && <p class="post-deck">{post.deck}</p>}
+    <div class="post-meta">
+      <span>{authorName}</span>
+      <span class={`badge badge-${post.status}`}>{post.status}</span>
+      {postDate && <span>{new Date(postDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>}
+    </div>
+  </header>
+
+  {bodyHtml
+    ? <div class="prose" set:html={bodyHtml} />
+    : <p class="no-body">No content yet.</p>
+  }
+</article>
+
+<script>
+  import { signOut } from '../../lib/auth';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('logout-btn')!.addEventListener('click', async () => {
+      await signOut();
+      window.location.href = '/login';
+    });
+  });
+</script>
+
+</body>
+</html>
