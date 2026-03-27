@@ -10,6 +10,12 @@ if (!res.ok) {
   return Astro.redirect('/login');
 }
 
+const postsRes = await fetch(`${PAYLOAD_URL}/api/posts/?depth=1`, {
+  headers: { cookie },
+});
+const postsData = postsRes.ok ? await postsRes.json() : { docs: [] };
+const posts: any[] = postsData.docs ?? [];
+
 const title = "Dashboard | LearnLog";
 ---
 
@@ -27,11 +33,17 @@ body { font-family: Arial, Helvetica, sans-serif; margin: 0; background: #f8fafc
 .nav-links a { margin-left:20px; color:#333; font-weight:500; }
 .logout-btn { margin-left:20px; background:#6c63ff; color:white; border:none; padding:8px 18px; border-radius:8px; font-size:14px; font-weight:500; cursor:pointer; }
 
-.main-container { display:flex; justify-content:center; align-items:center; height:calc(100vh - 70px); }
-
-.welcome-card { background:white; border-radius:18px; padding:60px 80px; text-align:center; box-shadow:0 25px 50px rgba(0,0,0,0.18); }
-.welcome-card h1 { font-size:36px; color:#2563eb; margin-bottom:12px; }
-.welcome-card p { font-size:16px; color:#666; }
+.posts-section { max-width:1100px; margin:40px auto; padding:0 24px; }
+.posts-section h1 { font-size:28px; font-weight:700; color:#1e293b; margin-bottom:24px; }
+.posts-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px; }
+.post-card { background:white; border-radius:12px; padding:24px; box-shadow:0 2px 8px rgba(0,0,0,0.08); display:flex; flex-direction:column; gap:10px; }
+.post-card h2 { font-size:18px; font-weight:600; color:#1e293b; }
+.post-deck { font-size:14px; color:#475569; line-height:1.5; }
+.post-meta { font-size:13px; color:#64748b; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.badge { font-size:11px; font-weight:600; padding:2px 8px; border-radius:99px; text-transform:uppercase; }
+.badge-published { background:#dcfce7; color:#16a34a; }
+.badge-draft { background:#fef9c3; color:#a16207; }
+.empty-state { text-align:center; color:#94a3b8; padding:60px 0; font-size:16px; }
 
 .footer { background:#111827; color:white; padding:30px; text-align:center; font-size:14px; }
 </style>
@@ -51,12 +63,28 @@ body { font-family: Arial, Helvetica, sans-serif; margin: 0; background: #f8fafc
 </nav>
 
 <!-- DASHBOARD CONTENT -->
-<div class="main-container">
-  <div class="welcome-card">
-    <h1>You have logged in</h1>
-    <p>Posts from other learners will appear here soon.</p>
-  </div>
-</div>
+<section class="posts-section">
+  <h1>All Posts</h1>
+  {posts.length === 0 ? (
+    <p class="empty-state">No posts yet.</p>
+  ) : (
+    <div class="posts-grid">
+      {posts.map((post: any) => (
+        <div class="post-card">
+          <h2>{post.title}</h2>
+          {post.deck && <p class="post-deck">{post.deck}</p>}
+          <div class="post-meta">
+            <span>{post.author?.name ?? post.author?.email ?? 'Unknown'}</span>
+            <span class={`badge badge-${post.status}`}>{post.status}</span>
+            {(post.publishedAt ?? post.createdAt) && (
+              <span>{new Date(post.publishedAt ?? post.createdAt).toLocaleDateString()}</span>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</section>
 
 <!-- FOOTER -->
 <footer class="footer">

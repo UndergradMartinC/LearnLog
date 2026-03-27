@@ -196,6 +196,10 @@ export interface Post {
    */
   slug: string;
   author: number | User;
+  /**
+   * A short preview sentence shown below the title.
+   */
+  deck?: string | null;
   body?: {
     root: {
       type: string;
@@ -382,6 +386,7 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   author?: T;
+  deck?: T;
   body?: T;
   tags?: T;
   status?: T;

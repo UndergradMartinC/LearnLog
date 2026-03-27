@@ -34,6 +34,13 @@ export const Posts: CollectionConfig = {
       required: true,
     },
     {
+      name: 'deck',
+      type: 'textarea',
+      admin: {
+        description: 'A short preview sentence shown below the title.',
+      },
+    },
+    {
       name: 'body',
       type: 'richText',
     },
