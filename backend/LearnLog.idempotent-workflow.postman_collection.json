@@ -1,0 +1,382 @@
+{
+  "info": {
+    "_postman_id": "4f2e7e61-0d17-4d32-9580-4f90aa15b4a7",
+    "name": "LearnLog Idempotent Endpoint Workflow",
+    "description": "Runner-friendly workflow that checks each core endpoint path, creating seed resources only if they do not already exist.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000", "type": "string" },
+    { "key": "email", "value": "admin@example.com", "type": "string" },
+    { "key": "password", "value": "changeme", "type": "string" },
+    { "key": "authToken", "value": "", "type": "string" },
+    { "key": "seedTagSlug", "value": "postman-seed-tag", "type": "string" },
+    { "key": "seedPostSlug", "value": "postman-seed-post", "type": "string" },
+    { "key": "seedCommentBody", "value": "POSTMAN_WORKFLOW_SEED_COMMENT", "type": "string" },
+    { "key": "tagId", "value": "", "type": "string" },
+    { "key": "postId", "value": "", "type": "string" },
+    { "key": "commentId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Users Health Endpoint",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/users/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "users", "health"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Health endpoint returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login User",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/users/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "users", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.collectionVariables.set('authToken', json.token || '');"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ensure Seed Tag Exists",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/api/tags?where[slug][equals]={{seedTagSlug}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tags"],
+          "query": [{ "key": "where[slug][equals]", "value": "{{seedTagSlug}}" }]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Find tag status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "const docs = Array.isArray(json.docs) ? json.docs : [];",
+              "if (docs.length > 0) {",
+              "  pm.collectionVariables.set('tagId', String(docs[0].id));",
+              "  postman.setNextRequest('Ensure Seed Post Exists');",
+              "} else {",
+              "  postman.setNextRequest('Create Seed Tag');",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Seed Tag",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman Seed Tag\",\n  \"slug\": \"{{seedTagSlug}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/tags",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tags"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Create tag status is 200 or 201', function () {",
+              "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.collectionVariables.set('tagId', String(json.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ensure Seed Post Exists",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/api/posts?where[slug][equals]={{seedPostSlug}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "posts"],
+          "query": [{ "key": "where[slug][equals]", "value": "{{seedPostSlug}}" }]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Find post status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "const docs = Array.isArray(json.docs) ? json.docs : [];",
+              "if (docs.length > 0) {",
+              "  pm.collectionVariables.set('postId', String(docs[0].id));",
+              "  postman.setNextRequest('Ensure Seed Comment Exists');",
+              "} else {",
+              "  postman.setNextRequest('Create Seed Post');",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Seed Post",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Postman Seed Post\",\n  \"slug\": \"{{seedPostSlug}}\",\n  \"status\": \"draft\",\n  \"tags\": [{{tagId}}]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/posts",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "posts"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Create post status is 200 or 201', function () {",
+              "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.collectionVariables.set('postId', String(json.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ensure Seed Comment Exists",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/api/comments?where[post][equals]={{postId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "comments"],
+          "query": [{ "key": "where[post][equals]", "value": "{{postId}}" }]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Find comments status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "const docs = Array.isArray(json.docs) ? json.docs : [];",
+              "const matched = docs.find((d) => d && d.body === pm.collectionVariables.get('seedCommentBody'));",
+              "if (matched) {",
+              "  pm.collectionVariables.set('commentId', String(matched.id));",
+              "  postman.setNextRequest('Verify Current User');",
+              "} else {",
+              "  postman.setNextRequest('Create Seed Comment');",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Seed Comment",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"body\": \"{{seedCommentBody}}\",\n  \"post\": {{postId}}\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/comments",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "comments"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Create comment status is 200 or 201', function () {",
+              "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.collectionVariables.set('commentId', String(json.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Verify Current User",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/api/users/me",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "users", "me"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Current user endpoint returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Verify Seed Tag By ID",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/api/tags/{{tagId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tags", "{{tagId}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Tag by id returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Verify Seed Post By ID",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/api/posts/{{postId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "posts", "{{postId}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Post by id returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Verify Seed Comment By ID",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/api/comments/{{commentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "comments", "{{commentId}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Comment by id returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

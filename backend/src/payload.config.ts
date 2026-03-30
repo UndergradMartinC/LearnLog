@@ -14,7 +14,14 @@ import { Users } from './collections/Users'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+/** Public URL of this Payload/Next app (admin + API). Required on csrf so browser Origin matches and auth cookies are accepted. */
+const serverURL =
+  process.env.PAYLOAD_SERVER_URL || process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
+/** Frontend that talks to the API (e.g. Astro). */
+const frontendURL = process.env.FRONTEND_URL || 'http://localhost:4321'
+
 export default buildConfig({
+  serverURL,
   admin: {
     user: Users.slug,
     importMap: {
@@ -34,7 +41,8 @@ export default buildConfig({
     },
   }),
   sharp,
-  cors: ['http://localhost:4321'],
-  csrf: ['http://localhost:4321'],
+  cors: [serverURL, frontendURL],
+  // Origins allowed to send cookie-based auth; must include serverURL (sanitizer also appends serverURL when non-empty).
+  csrf: [serverURL, frontendURL],
   plugins: [],
 })

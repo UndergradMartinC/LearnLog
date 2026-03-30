@@ -6,6 +6,22 @@ export const Posts: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'author', 'status', 'publishedAt'],
   },
+  access: {
+    create: ({ req }) => Boolean(req.user),
+  },
+  hooks: {
+    beforeValidate: [
+      ({ data, operation, req }) => {
+        if (operation !== 'create') return data
+        if (!req.user) return data
+
+        return {
+          ...data,
+          author: req.user.id,
+        }
+      },
+    ],
+  },
   fields: [
     {
       name: 'title',
