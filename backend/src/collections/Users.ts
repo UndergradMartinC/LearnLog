@@ -9,7 +9,8 @@ export const Users: CollectionConfig = {
     cookies: {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'Lax',
-      domain: process.env.COOKIE_DOMAIN || 'localhost',
+      // Omit domain in dev: a fixed "localhost" breaks 127.0.0.1 and can confuse browsers; set COOKIE_DOMAIN in prod if needed.
+      ...(process.env.COOKIE_DOMAIN ? { domain: process.env.COOKIE_DOMAIN } : {}),
     },
   },
   access: {
