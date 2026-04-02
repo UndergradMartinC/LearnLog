@@ -1,0 +1,235 @@
+---
+import TagInput from '../../components/TagInput.astro';
+
+const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL ?? 'http://localhost:3000';
+const cookie = Astro.request.headers.get('cookie') ?? '';
+
+const authRes = await fetch(`${PAYLOAD_URL}/api/users/me`, { headers: { cookie } });
+if (!authRes.ok) return Astro.redirect('/login');
+---
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>New Post | LearnLog</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-serif: 'Lora', Georgia, serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --color-bg: #f7f6f3;
+  --color-surface: #ffffff;
+  --color-border: #e4e2db;
+  --color-text: #2d2d2d;
+  --color-text-2: #5e6278;
+}
+
+body {
+  font-family: var(--font-sans);
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.navbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.125rem 2.5rem;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+.logo {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.nav-links a {
+  margin-left: 1.25rem;
+  color: var(--color-text-2);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+.logout-btn {
+  margin-left: 1.25rem;
+  background: var(--color-text);
+  color: var(--color-surface);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.page {
+  max-width: 42rem;
+  margin: 2.5rem auto;
+  padding: 0 1.5rem;
+}
+h1 {
+  font-family: var(--font-serif);
+  margin-bottom: 0.75rem;
+}
+.subtitle {
+  color: var(--color-text-2);
+  margin-bottom: 1.5rem;
+}
+
+form {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: grid;
+  gap: 1rem;
+}
+label {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+}
+input, textarea, select {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+  color: var(--color-text);
+  background: #fff;
+}
+textarea { resize: vertical; min-height: 88px; }
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+.button {
+  background: #2d2d2d;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+}
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.button.secondary {
+  background: #6b7280;
+}
+.button-row {
+  display: flex;
+  gap: 0.6rem;
+}
+.message {
+  font-size: 0.9rem;
+  color: var(--color-text-2);
+}
+.error { color: #b91c1c; }
+.success { color: #166534; }
+</style>
+</head>
+
+<body>
+<nav class="navbar">
+  <a href="/dashboard" class="logo">LearnLog</a>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <button class="logout-btn" id="logout-btn">Logout</button>
+  </div>
+</nav>
+
+<main class="page">
+  <h1>Create a Post</h1>
+  <p class="subtitle">Use your existing backend endpoint to publish from the frontend.</p>
+
+  <form id="create-post-form">
+    <label>
+      Title
+      <input id="title" type="text" required placeholder="What did you learn today?" />
+    </label>
+
+    <label>
+      Description
+      <textarea id="deck" placeholder="Explain what you learned..." />
+    </label>
+
+    <TagInput hiddenInputId="selected-tags" inputId="post-tag-input" />
+
+    <div class="actions">
+      <p id="message" class="message"></p>
+      <div class="button-row">
+        <button id="draft-btn" class="button secondary" type="submit" data-status="draft">Save draft</button>
+        <button id="publish-btn" class="button" type="submit" data-status="published">Publish</button>
+      </div>
+    </div>
+  </form>
+</main>
+
+<script>
+  import { signOut } from '../../lib/auth';
+  import { createPost } from '../../lib/posts';
+  import { resolveTagIds } from '../../lib/tags';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const logoutBtn = document.getElementById('logout-btn') as HTMLButtonElement;
+    const form = document.getElementById('create-post-form') as HTMLFormElement;
+    const titleInput = document.getElementById('title') as HTMLInputElement;
+    const deckInput = document.getElementById('deck') as HTMLTextAreaElement;
+    const selectedTagsInput = document.getElementById('selected-tags') as HTMLInputElement;
+    const message = document.getElementById('message') as HTMLParagraphElement;
+    const draftBtn = document.getElementById('draft-btn') as HTMLButtonElement;
+    const publishBtn = document.getElementById('publish-btn') as HTMLButtonElement;
+
+    logoutBtn.addEventListener('click', async () => {
+      await signOut();
+      window.location.href = '/login';
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      message.textContent = '';
+      message.className = 'message';
+      draftBtn.disabled = true;
+      publishBtn.disabled = true;
+
+      try {
+        const submitter = (event as SubmitEvent).submitter as HTMLButtonElement | null;
+        const status = (submitter?.dataset.status === 'published' ? 'published' : 'draft') as
+          | 'draft'
+          | 'published';
+        const selectedTags = JSON.parse(selectedTagsInput.value || '[]') as string[];
+        const resolvedTagIds = await resolveTagIds(selectedTags);
+
+        const result = await createPost({
+          title: titleInput.value.trim(),
+          deck: deckInput.value.trim() || undefined,
+          tags: resolvedTagIds,
+          status,
+        });
+
+        message.textContent = 'Post created. Redirecting...';
+        message.className = 'message success';
+        window.location.href = '/dashboard';
+      } catch (error: any) {
+        message.textContent = error?.message ?? 'Failed to create post.';
+        message.className = 'message error';
+      } finally {
+        draftBtn.disabled = false;
+        publishBtn.disabled = false;
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

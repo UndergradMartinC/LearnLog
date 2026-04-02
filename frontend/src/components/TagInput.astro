@@ -1,0 +1,190 @@
+---
+interface Props {
+  label?: string;
+  hiddenInputId?: string;
+  inputId?: string;
+  placeholder?: string;
+  helperText?: string;
+}
+
+const {
+  label = 'Tags',
+  hiddenInputId = 'selected-tags',
+  inputId = 'tag-input',
+  placeholder = 'Type a tag and press Enter',
+  helperText = 'Press Enter to add each tag. Backspace on empty input removes the last tag.',
+} = Astro.props;
+---
+
+<label class="tag-field" data-tag-input>
+  {label}
+  <input id={hiddenInputId} type="hidden" value="[]" />
+  <div class="tag-builder">
+    <input id={inputId} class="tag-input" type="text" placeholder={placeholder} />
+  </div>
+  <small class="message">{helperText}</small>
+</label>
+
+<style>
+.tag-field {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.tag-builder {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #fff;
+  padding: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  cursor: text;
+}
+
+:global(.tag-chip) {
+  display: inline-flex !important;
+  align-items: center;
+  background: #cbd6c3;
+  color: #2d2d2d;
+  border: 1px solid #94a3b8;
+  border-radius: 8px;
+  padding: 0.24rem 0.6rem;
+  font-size: 0.84rem;
+  line-height: 1.1;
+  white-space: nowrap;
+  align-self: flex-start;
+  cursor: pointer;
+}
+
+:global(.tag-chip-label) {
+  display: inline-block;
+  color: inherit;
+  line-height: 1.1;
+}
+
+.tag-input {
+  border: none;
+  padding: 0.35rem 0.25rem;
+  min-width: 140px;
+  flex: 1;
+}
+
+.tag-input:focus {
+  outline: none;
+}
+</style>
+
+<script>
+  const normalizeTag = (value: string) => value.trim().replace(/\s+/g, ' ');
+
+  const parseTags = (value: string | null): string[] => {
+    if (!value) return [];
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed.filter((entry) => typeof entry === 'string') : [];
+    } catch {
+      return [];
+    }
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-tag-input]').forEach((root) => {
+    const hiddenInput = root.querySelector<HTMLInputElement>('input[type="hidden"]');
+    const builder = root.querySelector<HTMLDivElement>('.tag-builder');
+    const input = root.querySelector<HTMLInputElement>('.tag-input');
+
+    if (!hiddenInput || !builder || !input) return;
+
+    const selectedTags = parseTags(hiddenInput.value);
+
+    const syncHidden = () => {
+      hiddenInput.value = JSON.stringify(selectedTags);
+    };
+
+    const renderTags = () => {
+      builder.querySelectorAll('.tag-chip').forEach((el) => el.remove());
+
+      selectedTags.forEach((tag) => {
+        const chip = document.createElement('div');
+        chip.className = 'tag-chip';
+        chip.setAttribute('role', 'button');
+        chip.setAttribute('tabindex', '0');
+        chip.setAttribute('aria-label', `Remove tag ${tag}`);
+
+        const text = document.createElement('span');
+        text.className = 'tag-chip-label';
+        text.textContent = tag;
+        chip.appendChild(text);
+
+        chip.addEventListener('click', () => {
+          const index = selectedTags.findIndex((entry) => entry.toLowerCase() === tag.toLowerCase());
+          if (index >= 0) {
+            selectedTags.splice(index, 1);
+            syncHidden();
+            renderTags();
+          }
+        });
+
+        chip.addEventListener('keydown', (event) => {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          const index = selectedTags.findIndex((entry) => entry.toLowerCase() === tag.toLowerCase());
+          if (index >= 0) {
+            selectedTags.splice(index, 1);
+            syncHidden();
+            renderTags();
+          }
+        });
+
+        builder.insertBefore(chip, input);
+      });
+    };
+
+    const addTag = (rawValue: string) => {
+      const value = normalizeTag(rawValue);
+      if (!value) return;
+
+      const exists = selectedTags.some((tag) => tag.toLowerCase() === value.toLowerCase());
+      if (exists) return;
+
+      selectedTags.push(value);
+      syncHidden();
+      renderTags();
+    };
+
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Backspace' && !input.value.trim()) {
+        if (selectedTags.length > 0) {
+          selectedTags.pop();
+          syncHidden();
+          renderTags();
+        }
+        return;
+      }
+
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        addTag(input.value);
+        input.value = '';
+      }
+    });
+
+    builder.addEventListener('click', () => {
+      input.focus();
+    });
+
+    const form = root.closest('form');
+    if (form) {
+      form.addEventListener('submit', () => {
+        if (input.value.trim()) {
+          addTag(input.value);
+          input.value = '';
+        }
+      });
+    }
+
+    syncHidden();
+    renderTags();
+  });
+</script>
