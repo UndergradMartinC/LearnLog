@@ -277,11 +277,11 @@ body {
 
 <!-- NAVBAR -->
 <nav class="navbar">
-  <a href="/dashboard" class="logo">LearnLog</a>
+  <a href="/" class="logo">LearnLog</a>
   <div class="nav-links">
-    <a href="#">Features</a>
-    <a href="#">Explore</a>
-    <a href="#">About</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/posts/new">New Post</a>
+    <a href="/profile">Profile</a>
     <button class="logout-btn" id="logout-btn">Logout</button>
   </div>
 </nav>
@@ -309,7 +309,7 @@ body {
 
   {bodyHtml
     ? <div class="prose" set:html={bodyHtml} />
-    : <p class="no-body">No Attachments.</p>
+    : <p class="no-body">No content yet.</p>
   }
 </article>
 

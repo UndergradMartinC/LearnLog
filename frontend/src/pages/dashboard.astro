@@ -73,6 +73,7 @@ body {
   font-weight: 600;
   color: var(--color-text);
   letter-spacing: -0.01em;
+  text-decoration: none;
 }
 .nav-links a {
   margin-left: 1.25rem;
@@ -80,7 +81,10 @@ body {
   font-size: var(--text-sm);
   font-weight: 500;
   text-decoration: none;
+  transition: color 0.12s;
 }
+.nav-links a:hover { color: var(--color-text); }
+.nav-links a.active { color: var(--color-text); font-weight: 600; }
 .logout-btn {
   margin-left: 1.25rem;
   background: var(--color-text);
@@ -164,8 +168,6 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.375rem;
-  margin-top: auto;
-  padding-top: 0.625rem;
 }
 .tag {
   font-size: var(--text-xs);
@@ -203,12 +205,11 @@ body {
 
 <!-- NAVBAR -->
 <nav class="navbar">
-  <div class="logo">LearnLog</div>
+  <a href="/" class="logo">LearnLog</a>
   <div class="nav-links">
+    <a href="/dashboard" class="active">Dashboard</a>
     <a href="/posts/new">New Post</a>
-    <a href="#">Features</a>
-    <a href="#">Explore</a>
-    <a href="#">About</a>
+    <a href="/profile">Profile</a>
     <button class="logout-btn" id="logout-btn">Logout</button>
   </div>
 </nav>
