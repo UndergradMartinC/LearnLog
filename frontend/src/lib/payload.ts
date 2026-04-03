@@ -1,9 +1,14 @@
 const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL ?? 'http://localhost:3000'
 
 export async function fetchPayload<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('payload-token') : null
   const res = await fetch(`${PAYLOAD_URL}/api${endpoint}`, {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `JWT ${token}` } : {}),
+      ...options?.headers,
+    },
     ...options,
   })
 

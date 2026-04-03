@@ -10,7 +10,7 @@ type TagsResponse = {
   docs?: TagDoc[];
 };
 
-function toSlug(value: string): string {
+export function toSlug(value: string): string {
   return value
     .trim()
     .toLowerCase()

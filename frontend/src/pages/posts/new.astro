@@ -1,11 +1,102 @@
 ---
 import TagInput from '../../components/TagInput.astro';
+import { toSlug } from '../../lib/tags';
 
 const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL ?? 'http://localhost:3000';
 const cookie = Astro.request.headers.get('cookie') ?? '';
 
 const authRes = await fetch(`${PAYLOAD_URL}/api/users/me`, { headers: { cookie } });
 if (!authRes.ok) return Astro.redirect('/login');
+
+// Server-side Payload helper — forwards the browser cookie, no client-side auth needed.
+async function payloadFetch<T>(endpoint: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${PAYLOAD_URL}/api${endpoint}`, {
+    ...init,
+    headers: { 'Content-Type': 'application/json', Cookie: cookie, ...init?.headers },
+  });
+  const body = await res.json();
+  if (!res.ok) {
+    const reason =
+      (Array.isArray(body?.errors) ? body.errors[0]?.message : null) ||
+      body?.message ||
+      res.statusText;
+    throw new Error(`${res.status} ${reason}`);
+  }
+  return body as T;
+}
+
+let submitError = '';
+
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const title = ((data.get('title') as string | null) ?? '').trim();
+    const deck = ((data.get('deck') as string | null) ?? '').trim() || undefined;
+    const status: 'draft' | 'published' =
+      data.get('status') === 'published' ? 'published' : 'draft';
+    const tagNames: string[] = JSON.parse(
+      (data.get('selected-tags') as string | null) || '[]',
+    );
+
+    // Resolve tags: find existing by slug, create if missing.
+    type TagDoc = { id: number; name: string; slug: string };
+    type TagsResponse = { docs?: TagDoc[] };
+    const tagIds: number[] = [];
+
+    for (const name of [...new Set(tagNames.map((n) => n.trim()).filter(Boolean))]) {
+      const slug = toSlug(name);
+      if (!slug) continue;
+
+      let tag: TagDoc | null = null;
+      const found = await payloadFetch<TagsResponse>(
+        `/tags?where[slug][equals]=${encodeURIComponent(slug)}&limit=1`,
+      );
+      tag = found.docs?.[0] ?? null;
+
+      if (!tag) {
+        try {
+          tag = await payloadFetch<TagDoc>('/tags', {
+            method: 'POST',
+            body: JSON.stringify({ name, slug }),
+          });
+        } catch {
+          // Race condition: another request created the same slug first.
+          const retry = await payloadFetch<TagsResponse>(
+            `/tags?where[slug][equals]=${encodeURIComponent(slug)}&limit=1`,
+          );
+          tag = retry.docs?.[0] ?? null;
+        }
+      }
+
+      if (tag) tagIds.push(tag.id);
+    }
+
+    // Create post (with slug-conflict retry).
+    type PostResponse = { doc: { id: number; slug: string } };
+    const postBody = { title, deck, tags: tagIds, status };
+    try {
+      await payloadFetch<PostResponse>('/posts', {
+        method: 'POST',
+        body: JSON.stringify(postBody),
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message.toLowerCase() : '';
+      const isSlugConflict =
+        msg.includes('slug') &&
+        (msg.includes('unique') || msg.includes('already exists') || msg.includes('duplicate'));
+      if (!isSlugConflict) throw err;
+
+      await payloadFetch<PostResponse>('/posts', {
+        method: 'POST',
+        body: JSON.stringify({ ...postBody, slug: `${toSlug(title)}-${Date.now()}` }),
+      });
+    }
+
+    return Astro.redirect('/dashboard');
+  } catch (err) {
+    submitError = err instanceof Error ? err.message : 'Failed to create post. Please try again.';
+  }
+}
 ---
 
 <html lang="en">
@@ -119,10 +210,6 @@ textarea { resize: vertical; min-height: 88px; }
   padding: 0.6rem 1rem;
   cursor: pointer;
 }
-.button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
 .button.secondary {
   background: #6b7280;
 }
@@ -135,7 +222,6 @@ textarea { resize: vertical; min-height: 88px; }
   color: var(--color-text-2);
 }
 .error { color: #b91c1c; }
-.success { color: #166534; }
 </style>
 </head>
 
@@ -150,26 +236,26 @@ textarea { resize: vertical; min-height: 88px; }
 
 <main class="page">
   <h1>Create a Post</h1>
-  <p class="subtitle">Use your existing backend endpoint to publish from the frontend.</p>
+  <p class="subtitle">Share what you learned today.</p>
 
-  <form id="create-post-form">
+  <form method="POST">
     <label>
       Title
-      <input id="title" type="text" required placeholder="What did you learn today?" />
+      <input name="title" type="text" required placeholder="What did you learn today?" />
     </label>
 
     <label>
       Description
-      <textarea id="deck" placeholder="Explain what you learned..." />
+      <textarea name="deck" placeholder="Explain what you learned..."></textarea>
     </label>
 
     <TagInput hiddenInputId="selected-tags" inputId="post-tag-input" />
 
     <div class="actions">
-      <p id="message" class="message"></p>
+      {submitError && <p class="message error">{submitError}</p>}
       <div class="button-row">
-        <button id="draft-btn" class="button secondary" type="submit" data-status="draft">Save draft</button>
-        <button id="publish-btn" class="button" type="submit" data-status="published">Publish</button>
+        <button class="button secondary" type="submit" name="status" value="draft">Save draft</button>
+        <button class="button" type="submit" name="status" value="published">Publish</button>
       </div>
     </div>
   </form>
@@ -177,57 +263,10 @@ textarea { resize: vertical; min-height: 88px; }
 
 <script>
   import { signOut } from '../../lib/auth';
-  import { createPost } from '../../lib/posts';
-  import { resolveTagIds } from '../../lib/tags';
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const logoutBtn = document.getElementById('logout-btn') as HTMLButtonElement;
-    const form = document.getElementById('create-post-form') as HTMLFormElement;
-    const titleInput = document.getElementById('title') as HTMLInputElement;
-    const deckInput = document.getElementById('deck') as HTMLTextAreaElement;
-    const selectedTagsInput = document.getElementById('selected-tags') as HTMLInputElement;
-    const message = document.getElementById('message') as HTMLParagraphElement;
-    const draftBtn = document.getElementById('draft-btn') as HTMLButtonElement;
-    const publishBtn = document.getElementById('publish-btn') as HTMLButtonElement;
-
-    logoutBtn.addEventListener('click', async () => {
-      await signOut();
-      window.location.href = '/login';
-    });
-
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      message.textContent = '';
-      message.className = 'message';
-      draftBtn.disabled = true;
-      publishBtn.disabled = true;
-
-      try {
-        const submitter = (event as SubmitEvent).submitter as HTMLButtonElement | null;
-        const status = (submitter?.dataset.status === 'published' ? 'published' : 'draft') as
-          | 'draft'
-          | 'published';
-        const selectedTags = JSON.parse(selectedTagsInput.value || '[]') as string[];
-        const resolvedTagIds = await resolveTagIds(selectedTags);
-
-        const result = await createPost({
-          title: titleInput.value.trim(),
-          deck: deckInput.value.trim() || undefined,
-          tags: resolvedTagIds,
-          status,
-        });
-
-        message.textContent = 'Post created. Redirecting...';
-        message.className = 'message success';
-        window.location.href = '/dashboard';
-      } catch (error: any) {
-        message.textContent = error?.message ?? 'Failed to create post.';
-        message.className = 'message error';
-      } finally {
-        draftBtn.disabled = false;
-        publishBtn.disabled = false;
-      }
-    });
+  document.getElementById('logout-btn')!.addEventListener('click', async () => {
+    await signOut();
+    window.location.href = '/login';
   });
 </script>
 

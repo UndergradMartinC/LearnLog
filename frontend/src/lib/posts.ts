@@ -1,5 +1,5 @@
 import { fetchPayload } from './payload';
-
+import { toSlug } from './tags';
 export interface CreatePostData {
   title: string;
   deck?: string;
@@ -28,12 +28,7 @@ export async function createPost(data: CreatePostData): Promise<CreatePostRespon
       (message.includes('unique') || message.includes('already exists') || message.includes('duplicate'));
 
     if (!likelySlugConflict) throw error;
-
-    const fallbackSlug = `${data.title
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9-]/g, '')}-${Date.now()}`;
+    const fallbackSlug = `${toSlug(data.title)}-${Date.now()}`;
 
     return fetchPayload<CreatePostResponse>('/posts', {
       method: 'POST',
