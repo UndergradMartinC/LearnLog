@@ -128,6 +128,8 @@ export interface User {
   id: number;
   name?: string | null;
   bio?: string | null;
+  major?: string | null;
+  school?: string | null;
   /**
    * Set to admin to grant administrative privileges. Default is "none" for regular users.
    */
@@ -332,6 +334,8 @@ export interface PayloadMigration {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   bio?: T;
+  major?: T;
+  school?: T;
   role?: T;
   updatedAt?: T;
   createdAt?: T;

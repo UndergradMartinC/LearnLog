@@ -1,4 +1,19 @@
 ---
+const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL ?? 'http://localhost:3000';
+const cookie = Astro.request.headers.get('cookie') ?? '';
+
+const meRes = await fetch(`${PAYLOAD_URL}/api/users/me`, { headers: { cookie } });
+if (!meRes.ok) return Astro.redirect('/login');
+
+const { user } = await meRes.json();
+
+const postsRes = await fetch(
+  `${PAYLOAD_URL}/api/posts?where[author][equals]=${user.id}&depth=0`,
+  { headers: { cookie } }
+);
+const postsData = postsRes.ok ? await postsRes.json() : { docs: [] };
+const posts: any[] = postsData.docs ?? [];
+
 const title = "Profile - LearnLog";
 ---
 
@@ -58,12 +73,13 @@ body {
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid #7c3aed;
-}
-
-.nav-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7c3aed;
+  font-weight: bold;
+  font-size: 14px;
 }
 
 /* ================= COVER ================= */
@@ -122,12 +138,13 @@ body {
   border-radius: 50%;
   border: 4px solid white;
   overflow: hidden;
-}
-
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7c3aed;
+  font-weight: bold;
+  font-size: 36px;
 }
 
 /* ================= MAIN ================= */
@@ -152,7 +169,6 @@ body {
   border-radius: 10px;
 }
 
-/* CENTER TEXT */
 .card strong {
   display: block;
   text-align: center;
@@ -163,28 +179,43 @@ body {
   text-align: center;
 }
 
-input {
+.empty-state {
+  text-align: center;
+  color: #9ca3af;
+  margin-top: 30px;
+  font-size: 14px;
+}
+
+input, textarea {
   width: 100%;
   padding: 6px;
+  box-sizing: border-box;
 }
 </style>
 </head>
 
 <body>
 
+<div
+  id="profileData"
+  data-id={user.id}
+  data-name={user.name ?? ''}
+  data-bio={user.bio ?? ''}
+  data-major={user.major ?? ''}
+  data-school={user.school ?? ''}
+  style="display:none"
+></div>
+
 <div class="navbar">
   <div class="logo">LearnLog</div>
 
   <div class="nav-right">
-    <a href="#">Features</a>
-    <a href="#">Explore</a>
-    <a href="#">About</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/posts/new">New Post</a>
 
     <div class="nav-profile">
-      <span id="navName"></span>
-      <div class="nav-avatar">
-        <img id="navImage" />
-      </div>
+      <span id="navName">{user.name ?? user.email}</span>
+      <div class="nav-avatar">{(user.name ?? user.email ?? '?')[0].toUpperCase()}</div>
     </div>
   </div>
 </div>
@@ -193,12 +224,14 @@ input {
   <div class="profile-row">
 
     <div class="name-section">
-      <div id="username" class="name"></div>
-      <div id="editControls"></div>
+      <div id="username" class="name">{user.name ?? user.email}</div>
+      <div id="editControls">
+        <button class="edit-btn" onclick="enterEditMode()">Edit Profile</button>
+      </div>
     </div>
 
     <div class="avatar">
-      <img id="profileImage" />
+      {(user.name ?? user.email ?? '?')[0].toUpperCase()}
     </div>
 
   </div>
@@ -211,122 +244,79 @@ input {
 <div class="cards">
   <div class="card">
     <strong>Bio</strong>
-    <p id="bioText"></p>
+    <p id="bioText">{user.bio || 'Add a bio...'}</p>
   </div>
 
   <div class="card">
     <strong>Major</strong>
-    <p id="majorText"></p>
+    <p id="majorText">{user.major || 'Not set'}</p>
   </div>
 
   <div class="card">
     <strong>School</strong>
-    <p id="schoolText"></p>
+    <p id="schoolText">{user.school || 'Not set'}</p>
   </div>
 </div>
 
 <h2 class="section-title">Recent Learning Logs</h2>
 
-<div class="cards">
-  <div class="card">
-    <strong>Understanding Binary Search Trees</strong>
-    <p>Example log</p>
+{posts.length > 0 ? (
+  <div class="cards">
+    {posts.slice(0, 3).map((post: any) => (
+      <div class="card">
+        <strong><a href={`/posts/${post.slug}`} style="color:inherit;text-decoration:none">{post.title}</a></strong>
+        <p>{post.deck ?? ''}</p>
+      </div>
+    ))}
   </div>
-
-  <div class="card">
-    <strong>Learning Docker Containers</strong>
-    <p>Containers help deploy apps</p>
-  </div>
-
-  <div class="card">
-    <strong>Mastering Dynamic Programming</strong>
-    <p>Breaking problems into subproblems</p>
-  </div>
-</div>
+) : (
+  <p class="empty-state">No learning logs yet. <a href="/posts/new">Create your first post.</a></p>
+)}
 
 </div>
 
 <script>
+import { updateProfile } from '../lib/auth';
 
-/* ===== FORCE GENERIC NAME ===== */
-localStorage.setItem("username", "Your Name");
+const profileData = document.getElementById('profileData') as HTMLElement;
+const userId = profileData.dataset.id!;
 
-/* ===== AUTH ===== */
-const isLoggedIn = true;
-const loggedInUserId = "123";
-const profileUserId = "123";
-const canEdit = isLoggedIn && loggedInUserId === profileUserId;
-
-/* ===== USER DATA ===== */
-let currentUser = {
-  username: "Your Name",
-  profileImage: localStorage.getItem("profileImage") || ""
-};
-
-/* ===== LOAD PROFILE ===== */
-function loadProfile() {
-  document.getElementById("username").textContent = currentUser.username;
-  document.getElementById("navName").textContent = currentUser.username;
-
-  document.getElementById("bioText").textContent =
-    localStorage.getItem("bio") || "Add a bio...";
-
-  document.getElementById("majorText").textContent =
-    localStorage.getItem("major") || "Not set";
-
-  document.getElementById("schoolText").textContent =
-    localStorage.getItem("school") || "Not set";
-
-  if (currentUser.profileImage) {
-    document.getElementById("profileImage").src = currentUser.profileImage;
-    document.getElementById("navImage").src = currentUser.profileImage;
-  }
-}
-
-/* ===== BUTTON ===== */
-function loadEditControls() {
-  if (!canEdit) return;
-
-  document.getElementById("editControls").innerHTML = `
-    <button class="edit-btn" onclick="enterEditMode()">Edit Profile</button>
-  `;
-}
-
-/* ===== EDIT ===== */
-function enterEditMode() {
-  document.getElementById("editControls").innerHTML = `
-    <button class="save-btn" onclick="saveProfile()">Save</button>
-  `;
-
-  makeInput("username", currentUser.username);
-  makeInput("bioText", localStorage.getItem("bio") || "");
-  makeInput("majorText", localStorage.getItem("major") || "");
-  makeInput("schoolText", localStorage.getItem("school") || "");
-}
-
-/* ===== HELPER ===== */
-function makeInput(id, value) {
-  const el = document.getElementById(id);
-  const input = document.createElement("input");
+function makeInput(id: string, value: string) {
+  const el = document.getElementById(id)!;
+  const input = document.createElement('input');
   input.value = value;
   input.id = id;
   el.replaceWith(input);
 }
 
-/* ===== SAVE ===== */
-function saveProfile() {
-  localStorage.setItem("username", "Your Name"); // force generic
-  localStorage.setItem("bio", document.getElementById("bioText").value);
-  localStorage.setItem("major", document.getElementById("majorText").value);
-  localStorage.setItem("school", document.getElementById("schoolText").value);
+function enterEditMode() {
+  document.getElementById('editControls')!.innerHTML = `
+    <button class="save-btn" onclick="saveProfile()">Save</button>
+  `;
 
-  location.reload();
+  makeInput('username', profileData.dataset.name!);
+  makeInput('bioText', profileData.dataset.bio!);
+  makeInput('majorText', profileData.dataset.major!);
+  makeInput('schoolText', profileData.dataset.school!);
 }
 
-/* ===== INIT ===== */
-loadProfile();
-loadEditControls();
+async function saveProfile() {
+  const name = (document.getElementById('username') as HTMLInputElement).value.trim();
+  const bio = (document.getElementById('bioText') as HTMLInputElement).value.trim();
+  const major = (document.getElementById('majorText') as HTMLInputElement).value.trim();
+  const school = (document.getElementById('schoolText') as HTMLInputElement).value.trim();
 
+  try {
+    await updateProfile(userId, { name, bio, major, school });
+    location.reload();
+  } catch (err) {
+    alert('Failed to save: ' + (err as Error).message);
+  }
+}
+
+// Expose to inline onclick handlers
+(window as any).enterEditMode = enterEditMode;
+(window as any).saveProfile = saveProfile;
 </script>
 
 </body>

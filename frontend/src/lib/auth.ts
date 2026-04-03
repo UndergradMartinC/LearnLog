@@ -37,3 +37,15 @@ export async function signOut(): Promise<void> {
     localStorage.removeItem('payload-token');
   }
 }
+
+export async function updateProfile(id: string, data: {
+  name?: string;
+  bio?: string;
+  major?: string;
+  school?: string;
+}): Promise<void> {
+  await fetchPayload(`/users/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
