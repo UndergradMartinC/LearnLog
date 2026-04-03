@@ -160,6 +160,24 @@ body {
 .badge-published { background: #ecfdf5; color: #16a34a; }
 .badge-draft     { background: #fefce8; color: #a16207; }
 
+.post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: auto;
+  padding-top: 0.625rem;
+}
+.tag {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-text-2);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 99px;
+  padding: 0.1rem 0.55rem;
+  letter-spacing: 0.01em;
+}
+
 .empty-state {
   text-align: center;
   color: var(--color-text-muted);
@@ -207,6 +225,13 @@ body {
           <div class="post-card">
             <h2>{post.title}</h2>
             {post.deck && <p class="post-deck">{post.deck}</p>}
+            {Array.isArray(post.tags) && post.tags.length > 0 && (
+              <div class="post-tags">
+                {post.tags.map((tag: any) => (
+                  <span class="tag">{tag.name ?? tag}</span>
+                ))}
+              </div>
+            )}
             <div class="post-meta">
               <span>{post.author?.name ?? post.author?.email ?? 'Unknown'}</span>
               <span class={`badge badge-${post.status}`}>{post.status}</span>
