@@ -188,6 +188,11 @@ body {
   font-size: var(--text-base);
   font-style: italic;
 }
+.empty-state a {
+  color: var(--color-accent, #3d5a78);
+  text-decoration: none;
+}
+.empty-state a:hover { text-decoration: underline; }
 
 .footer {
   background: #1c1c1e;
@@ -218,7 +223,7 @@ body {
 <section class="posts-section">
   <h1>All Posts</h1>
   {posts.length === 0 ? (
-    <p class="empty-state">No posts yet.</p>
+    <p class="empty-state">No posts yet. <a href="/posts/new">Write your first learning log →</a></p>
   ) : (
     <div class="posts-grid">
       {posts.map((post: any) => (

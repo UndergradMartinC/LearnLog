@@ -6,281 +6,352 @@ const title = "LearnLog";
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>{title}</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+
 <style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-serif: 'Lora', Georgia, serif;
+  --font-sans:  'DM Sans', system-ui, sans-serif;
+  --color-bg:         #f7f6f3;
+  --color-surface:    #ffffff;
+  --color-border:     #e4e2db;
+  --color-text:       #2d2d2d;
+  --color-text-2:     #5e6278;
+  --color-text-muted: #9090a0;
+  --color-accent:     #3d5a78;
+}
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
-  margin: 0;
-  background: #f8fafc;
-  color: #333;
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
-a {
-  text-decoration: none;
-}
+a { text-decoration: none; }
 
-/* NAVBAR */
-
+/* ─── NAVBAR ─── */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 40px;
-  background: white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  padding: 1.125rem 2.5rem;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
 }
-
 .logo {
-  font-size: 22px;
-  font-weight: bold;
-  color: #2563eb;
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
 }
-
-.nav-links a {
-  margin-left: 20px;
-  color: #333;
+.nav-actions { display: flex; align-items: center; gap: 1rem; }
+.nav-login {
+  font-size: 0.875rem;
   font-weight: 500;
+  color: var(--color-text-2);
+  transition: color 0.12s;
 }
-
-.signup-btn {
-  background: #10b981;
-  color: white;
-  padding: 8px 14px;
-  border-radius: 6px;
+.nav-login:hover { color: var(--color-text); }
+.nav-signup {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-surface);
+  background: var(--color-text);
+  padding: 0.45rem 1rem;
+  border-radius: 5px;
+  transition: opacity 0.12s;
 }
+.nav-signup:hover { opacity: 0.8; }
 
-/* HERO */
-
+/* ─── HERO ─── */
 .hero {
-  text-align: center;
-  padding: 140px 20px;
-  color: white;
-  background: linear-gradient(135deg,#2563eb,#7c3aed);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: clamp(4rem, 10vw, 7rem) 2.5rem clamp(3.5rem, 8vw, 6rem);
 }
-
+.hero-inner { max-width: 56rem; margin: 0 auto; }
+.hero-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 1.5rem;
+}
 .hero h1 {
-  font-size: 48px;
-  margin-bottom: 20px;
+  font-family: var(--font-serif);
+  font-size: clamp(2.75rem, 6vw, 4.5rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--color-text);
+  max-width: 16ch;
+  margin-bottom: 1.75rem;
 }
-
-.hero p {
-  font-size: 18px;
-  max-width: 600px;
-  margin: auto;
-  opacity: 0.9;
+.hero-body {
+  font-size: clamp(1rem, 1.5vw, 1.125rem);
+  color: var(--color-text-2);
+  line-height: 1.75;
+  max-width: 44ch;
+  margin-bottom: 2.5rem;
 }
-
-.hero-buttons {
-  margin-top: 30px;
-}
-
-.btn {
-  padding: 12px 24px;
+.hero-actions { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+.btn-primary {
+  display: inline-block;
+  background: var(--color-text);
+  color: var(--color-surface);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  padding: 0.7rem 1.5rem;
   border-radius: 6px;
-  margin: 10px;
-  font-size: 16px;
+  transition: opacity 0.12s;
+}
+.btn-primary:hover { opacity: 0.8; }
+.btn-secondary {
+  display: inline-block;
+  font-size: 0.9375rem;
   font-weight: 500;
-  color: white;
+  color: var(--color-text-2);
+  transition: color 0.12s;
 }
+.btn-secondary:hover { color: var(--color-text); }
 
-.login {
-  background: #3b82f6;
-}
-
-.signup {
-  background: #10b981;
-}
-
-/* FEATURES */
-
+/* ─── FEATURES ─── */
 .features {
-  padding: 80px 40px;
-  text-align: center;
-  background: #f8fafc;
+  padding: clamp(3rem, 6vw, 5rem) 2.5rem;
+  background: var(--color-bg);
 }
-
-.feature-grid {
-  margin-top: 40px;
+.features-inner { max-width: 56rem; margin: 0 auto; }
+.section-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 2.5rem;
+}
+.features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  border-top: 1px solid var(--color-border);
+}
+.feature {
+  padding: 2rem 2rem 2rem 0;
+  border-right: 1px solid var(--color-border);
+}
+.feature:last-child { border-right: none; padding-right: 0; }
+.feature-num {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  margin-bottom: 1rem;
+}
+.feature-title {
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+.feature-desc {
+  font-size: 0.875rem;
+  color: var(--color-text-2);
+  line-height: 1.65;
 }
 
-.feature-card {
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  transition: transform 0.2s;
+/* ─── SAMPLE POSTS ─── */
+.posts-section {
+  padding: clamp(3rem, 6vw, 5rem) 2.5rem;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+.posts-inner { max-width: 56rem; margin: 0 auto; }
+.post-list { list-style: none; }
+.post-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1.5rem;
+  padding: 1.125rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.post-list-item:first-child { border-top: 1px solid var(--color-border); }
+.post-list-title {
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+.post-list-desc {
+  font-size: 0.875rem;
+  color: var(--color-text-2);
+  margin-top: 0.15rem;
+}
+.post-list-arrow {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
 }
 
-.feature-card:hover {
-  transform: translateY(-6px);
-}
-
-/* POSTS */
-
-.posts {
-  padding: 80px 40px;
-  text-align: center;
-  background: white;
-}
-
-.post-grid {
-  margin-top: 30px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
-  gap: 25px;
-}
-
-.post-card {
-  background: #f1f5f9;
-  padding: 20px;
-  border-radius: 10px;
-}
-
-/* CTA */
-
+/* ─── CTA ─── */
 .cta {
-  background: linear-gradient(135deg,#2563eb,#10b981);
-  color: white;
-  padding: 80px 20px;
-  text-align: center;
+  padding: clamp(3.5rem, 7vw, 5.5rem) 2.5rem;
+  background: var(--color-bg);
+}
+.cta-inner { max-width: 56rem; margin: 0 auto; }
+.cta h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--color-text);
+  max-width: 22ch;
+  margin-bottom: 0.875rem;
+  line-height: 1.15;
+}
+.cta p {
+  font-size: 1rem;
+  color: var(--color-text-2);
+  margin-bottom: 2rem;
+  max-width: 40ch;
 }
 
-/* FOOTER */
-
+/* ─── FOOTER ─── */
 .footer {
-  background: #111827;
-  color: white;
-  padding: 30px;
-  text-align: center;
-  font-size: 14px;
+  background: #1c1c2a;
+  color: #7a7a95;
+  padding: 1.75rem 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+}
+.footer-brand {
+  font-family: var(--font-serif);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #c8c8d8;
 }
 
+@media (max-width: 640px) {
+  .navbar { padding: 1rem 1.25rem; }
+  .hero, .features, .posts-section, .cta { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .feature { border-right: none; padding-right: 0; padding-bottom: 1.5rem; }
+  .footer { flex-direction: column; align-items: flex-start; }
+}
 </style>
-
 </head>
 
 <body>
 
 <!-- NAVBAR -->
-
 <nav class="navbar">
-
-<div class="logo">LearnLog</div>
-
-<div class="nav-links">
-<a href="#">Features</a>
-<a href="#">Explore</a>
-<a href="#">About</a>
-<a href="/login">Login</a>
-<a class="signup-btn" href="/signup">Sign Up</a>
-</div>
-
+  <div class="logo">LearnLog</div>
+  <div class="nav-actions">
+    <a href="/login" class="nav-login">Sign in</a>
+    <a href="/signup" class="nav-signup">Get started</a>
+  </div>
 </nav>
 
 <!-- HERO -->
-
 <section class="hero">
-
-<h1>Track What You Learn</h1>
-
-<p>
-LearnLog is a platform where students and developers
-document their learning journey, share insights,
-and build a portfolio of knowledge over time.
-</p>
-
-<div class="hero-buttons">
-<a class="btn login" href="/login">Login</a>
-<a class="btn signup" href="/signup">Create Account</a>
-</div>
-
+  <div class="hero-inner">
+    <p class="hero-label">For students who take learning seriously</p>
+    <h1>Document what you learn, every day.</h1>
+    <p class="hero-body">
+      LearnLog is a writing space for students. Capture what you studied, what clicked,
+      and what you want to revisit — then watch your knowledge compound over time.
+    </p>
+    <div class="hero-actions">
+      <a href="/signup" class="btn-primary">Create your log</a>
+      <a href="/login" class="btn-secondary">Already have an account →</a>
+    </div>
+  </div>
 </section>
 
 <!-- FEATURES -->
-
 <section class="features">
-
-<h2>Why Use LearnLog?</h2>
-
-<div class="feature-grid">
-
-<div class="feature-card">
-<h3>📚 Write Learning Logs</h3>
-<p>Create posts documenting what you learn every day.</p>
-</div>
-
-<div class="feature-card">
-<h3>📈 Track Progress</h3>
-<p>Build a timeline showing your learning journey.</p>
-</div>
-
-<div class="feature-card">
-<h3>🌎 Share Knowledge</h3>
-<p>Publish insights and help other learners grow.</p>
-</div>
-
-<div class="feature-card">
-<h3>🧠 Build Your Portfolio</h3>
-<p>Show employers how you continuously improve.</p>
-</div>
-
-</div>
-
+  <div class="features-inner">
+    <p class="section-label">How it works</p>
+    <div class="features-grid">
+      <div class="feature">
+        <p class="feature-num">01</p>
+        <h3 class="feature-title">Write learning logs</h3>
+        <p class="feature-desc">Create posts documenting what you study — the concepts you're working through, the problems you solved, the things you want to remember.</p>
+      </div>
+      <div class="feature">
+        <p class="feature-num">02</p>
+        <h3 class="feature-title">Tag by subject</h3>
+        <p class="feature-desc">Organize posts by course, topic, or project. Watch your understanding of each subject grow entry by entry.</p>
+      </div>
+      <div class="feature">
+        <p class="feature-num">03</p>
+        <h3 class="feature-title">Build a portfolio</h3>
+        <p class="feature-desc">Your published logs form a record of how you think and learn — something a GPA alone can't show.</p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<!-- POSTS -->
-
-<section class="posts">
-
-<h2>Recent Learning Logs</h2>
-
-<div class="post-grid">
-
-<div class="post-card">
-<h4>Understanding Binary Search Trees</h4>
-<p>A deep dive into BST operations and complexity.</p>
-</div>
-
-<div class="post-card">
-<h4>Learning Docker Containers</h4>
-<p>How containers help deploy software consistently.</p>
-</div>
-
-<div class="post-card">
-<h4>Mastering Dynamic Programming</h4>
-<p>Breaking down complex problems into smaller ones.</p>
-</div>
-
-</div>
-
+<!-- SAMPLE POSTS -->
+<section class="posts-section">
+  <div class="posts-inner">
+    <p class="section-label">From the community</p>
+    <ul class="post-list">
+      <li class="post-list-item">
+        <div>
+          <div class="post-list-title">Understanding Binary Search Trees</div>
+          <div class="post-list-desc">A deep dive into BST operations and time complexity.</div>
+        </div>
+        <span class="post-list-arrow">→</span>
+      </li>
+      <li class="post-list-item">
+        <div>
+          <div class="post-list-title">Learning Docker Containers</div>
+          <div class="post-list-desc">How containers help deploy software consistently.</div>
+        </div>
+        <span class="post-list-arrow">→</span>
+      </li>
+      <li class="post-list-item">
+        <div>
+          <div class="post-list-title">Mastering Dynamic Programming</div>
+          <div class="post-list-desc">Breaking down complex problems into smaller, overlapping pieces.</div>
+        </div>
+        <span class="post-list-arrow">→</span>
+      </li>
+    </ul>
+  </div>
 </section>
 
 <!-- CTA -->
-
 <section class="cta">
-
-<h2>Start Your Learning Journey Today</h2>
-
-<p>Join LearnLog and document what you learn every day.</p>
-
-<div class="hero-buttons">
-<a class="btn signup" href="/signup">Create Your Account</a>
-</div>
-
+  <div class="cta-inner">
+    <h2>Start your learning log today.</h2>
+    <p>Free to use. No setup required. Just open it and write.</p>
+    <a href="/signup" class="btn-primary">Create your account</a>
+  </div>
 </section>
 
 <!-- FOOTER -->
-
 <footer class="footer">
-
-<p>© 2026 LearnLog</p>
-<p>Built by UL Lafayette CS Students</p>
-
+  <span class="footer-brand">LearnLog</span>
+  <span>© 2026 · Built by UL Lafayette CS Students</span>
 </footer>
 
 </body>
