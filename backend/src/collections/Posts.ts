@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Where } from 'payload'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -8,6 +8,15 @@ export const Posts: CollectionConfig = {
   },
   access: {
     create: ({ req }) => Boolean(req.user),
+    read: ({ req }) => {
+      if (!req.user) return false
+      return {
+        or: [
+          { status: { equals: 'published' } },
+          { author: { equals: req.user.id } },
+        ],
+      } as Where
+    },
   },
   hooks: {
     beforeValidate: [
