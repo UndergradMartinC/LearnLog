@@ -84,18 +84,17 @@ body {
 .nav-links a.active { color: var(--color-text); font-weight: 600; }
 .logout-btn {
   margin-left: 1.25rem;
-  background: var(--color-text);
-  color: var(--color-surface);
+  background: transparent;
+  color: var(--color-text-muted);
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  padding: 0.5rem 0;
   font-family: var(--font-sans);
   font-size: var(--text-sm);
   font-weight: 500;
   cursor: pointer;
-  transition: opacity 0.12s;
+  transition: color 0.12s;
 }
-.logout-btn:hover { opacity: 0.8; }
+.logout-btn:hover { color: var(--color-text); }
 
 /* ─── PROFILE HEADER ─── */
 .profile-header {

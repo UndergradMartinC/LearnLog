@@ -17,6 +17,7 @@ const postsData = postsRes.ok ? await postsRes.json() : { docs: [] };
 const posts: any[] = postsData.docs ?? [];
 
 const title = "Dashboard | LearnLog";
+const showCreated = Astro.url.searchParams.get('created') === '1';
 ---
 
 <html lang="en">
@@ -47,6 +48,7 @@ const title = "Dashboard | LearnLog";
   --color-text:       #2d2d2d;
   --color-text-2:     #5e6278;
   --color-text-muted: #9090a0;
+  --color-accent:     #3d5a78;
 }
 
 body {
@@ -87,17 +89,17 @@ body {
 .nav-links a.active { color: var(--color-text); font-weight: 600; }
 .logout-btn {
   margin-left: 1.25rem;
-  background: var(--color-text);
-  color: var(--color-surface);
+  background: transparent;
+  color: var(--color-text-muted);
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  padding: 0.5rem 0;
   font-family: var(--font-sans);
   font-size: var(--text-sm);
   font-weight: 500;
   cursor: pointer;
-  letter-spacing: 0.01em;
+  transition: color 0.12s;
 }
+.logout-btn:hover { color: var(--color-text); }
 
 .posts-section { max-width: 68.75rem; margin: 2.5rem auto; padding: 0 1.5rem; }
 .posts-section h1 {
@@ -140,7 +142,7 @@ body {
   letter-spacing: -0.01em;
 }
 .post-deck {
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
   color: var(--color-text-2);
   line-height: 1.65;
 }
@@ -194,8 +196,18 @@ body {
 }
 .empty-state a:hover { text-decoration: underline; }
 
+.success-banner {
+  background: #f0f7f4;
+  border-bottom: 1px solid #c8e6d8;
+  color: #1a5c3a;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  padding: 0.75rem 2.5rem;
+  letter-spacing: 0.01em;
+}
+
 .footer {
-  background: #1c1c1e;
+  background: #1c1c2a;
   color: #a8a8b8;
   padding: 1.875rem;
   text-align: center;
@@ -218,6 +230,10 @@ body {
     <button class="logout-btn" id="logout-btn">Logout</button>
   </div>
 </nav>
+
+{showCreated && (
+  <div class="success-banner" id="success-banner">Post published.</div>
+)}
 
 <!-- DASHBOARD CONTENT -->
 <section class="posts-section">
@@ -260,6 +276,18 @@ body {
       await signOut();
       window.location.href = '/login';
     });
+
+    const banner = document.getElementById('success-banner');
+    if (banner) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('created');
+      window.history.replaceState({}, '', url.pathname);
+      setTimeout(() => {
+        banner.style.transition = 'opacity 0.4s';
+        banner.style.opacity = '0';
+        setTimeout(() => banner.remove(), 400);
+      }, 4000);
+    }
   });
 </script>
 

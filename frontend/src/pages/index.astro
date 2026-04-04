@@ -142,7 +142,7 @@ a { text-decoration: none; }
 }
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   border-top: 1px solid var(--color-border);
 }
 .feature {
@@ -252,6 +252,7 @@ a { text-decoration: none; }
 @media (max-width: 640px) {
   .navbar { padding: 1rem 1.25rem; }
   .hero, .features, .posts-section, .cta { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .features-grid { grid-template-columns: 1fr; }
   .feature { border-right: none; padding-right: 0; padding-bottom: 1.5rem; }
   .footer { flex-direction: column; align-items: flex-start; }
 }

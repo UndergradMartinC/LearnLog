@@ -92,7 +92,7 @@ if (Astro.request.method === 'POST') {
       });
     }
 
-    return Astro.redirect('/dashboard');
+    return Astro.redirect('/dashboard?created=1');
   } catch (err) {
     submitError = err instanceof Error ? err.message : 'Failed to create post. Please try again.';
   }
@@ -150,14 +150,17 @@ body {
 }
 .logout-btn {
   margin-left: 1.25rem;
-  background: var(--color-text);
-  color: var(--color-surface);
+  background: transparent;
+  color: var(--color-text-2);
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  padding: 0.5rem 0;
+  font-family: var(--font-sans);
   font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: color 0.12s;
 }
+.logout-btn:hover { color: var(--color-text); }
 
 .page {
   max-width: 42rem;
