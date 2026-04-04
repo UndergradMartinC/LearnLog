@@ -18,6 +18,8 @@ const posts: any[] = postsData.docs ?? [];
 
 const title = "Dashboard | LearnLog";
 const showCreated = Astro.url.searchParams.get('created') === '1';
+const showSaved   = Astro.url.searchParams.get('saved')   === '1';
+const showWelcome = Astro.url.searchParams.get('welcome') === '1';
 ---
 
 <html lang="en">
@@ -191,7 +193,7 @@ body {
   font-style: italic;
 }
 .empty-state a {
-  color: var(--color-accent, #3d5a78);
+  color: var(--color-accent);
   text-decoration: none;
 }
 .empty-state a:hover { text-decoration: underline; }
@@ -205,6 +207,32 @@ body {
   padding: 0.75rem 2.5rem;
   letter-spacing: 0.01em;
 }
+.saved-banner {
+  background: #fefce8;
+  border-bottom: 1px solid #fde68a;
+  color: #78350f;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  padding: 0.75rem 2.5rem;
+  letter-spacing: 0.01em;
+}
+.welcome-banner {
+  background: #f5f2ec;
+  border-bottom: 1px solid #ddd8ce;
+  color: var(--color-text-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  padding: 0.75rem 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.welcome-banner a {
+  color: var(--color-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+.welcome-banner a:hover { text-decoration: underline; }
 
 .footer {
   background: #1c1c2a;
@@ -234,10 +262,18 @@ body {
 {showCreated && (
   <div class="success-banner" id="success-banner">Post published.</div>
 )}
+{showSaved && (
+  <div class="saved-banner" id="saved-banner">Draft saved.</div>
+)}
+{showWelcome && (
+  <div class="welcome-banner" id="welcome-banner">
+    Welcome to LearnLog. <a href="/posts/new">Write your first learning log →</a>
+  </div>
+)}
 
 <!-- DASHBOARD CONTENT -->
 <section class="posts-section">
-  <h1>All Posts</h1>
+  <h1>Recent Posts</h1>
   {posts.length === 0 ? (
     <p class="empty-state">No posts yet. <a href="/posts/new">Write your first learning log →</a></p>
   ) : (
@@ -277,11 +313,18 @@ body {
       window.location.href = '/login';
     });
 
-    const banner = document.getElementById('success-banner');
-    if (banner) {
-      const url = new URL(window.location.href);
-      url.searchParams.delete('created');
-      window.history.replaceState({}, '', url.pathname);
+    const url = new URL(window.location.href);
+    url.searchParams.delete('created');
+    url.searchParams.delete('saved');
+    url.searchParams.delete('welcome');
+    window.history.replaceState({}, '', url.pathname);
+
+    for (const id of ['success-banner', 'saved-banner', 'welcome-banner']) {
+      const banner = document.getElementById(id);
+      if (!banner) continue;
+      if (id === 'success-banner' || id === 'saved-banner') {
+        localStorage.removeItem('learnlog-draft');
+      }
       setTimeout(() => {
         banner.style.transition = 'opacity 0.4s';
         banner.style.opacity = '0';
