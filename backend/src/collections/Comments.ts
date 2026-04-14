@@ -7,6 +7,17 @@ export const Comments: CollectionConfig = {
   },
   access: {
     create: ({ req }) => Boolean(req.user),
+    read: ({ req }) => Boolean(req.user),
+    update: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return { author: { equals: user.id } }
+    },
+    delete: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return { author: { equals: user.id } }
+    },
   },
   hooks: {
     beforeValidate: [
@@ -32,14 +43,6 @@ export const Comments: CollectionConfig = {
       type: 'relationship',
       relationTo: 'users',
       required: true,
-      hooks: {
-        beforeValidate: [
-          ({ value, req, operation }) => {
-            if (operation === 'create') return req.user?.id ?? value
-            return value
-          },
-        ],
-      },
     },
     {
       name: 'post',
@@ -56,29 +59,4 @@ export const Comments: CollectionConfig = {
       },
     },
   ],
-  // Access Control: 
-  // - Admins can create, read, update, delete any comment
-  // - Users can create comments, read all comments, but can only update/delete their own comments
-  access: {
-    // Create Access
-    create: ({ req: {user} }) => {
-      return !!user // Only logged in users can create comments
-    },
-    // Read Access
-    read: ({ req: {user} }) => {
-      return !!user // Only logged in users can read comments
-    },
-    // Update Access:    
-    update: ({ req: {user} }) => {
-      if (!user) return false; // Only logged in users can update comments
-      if (user.role === 'admin') return true; // Admins can update any comment
-      return { author: { equals: user.id } }; // Users can only update their own comments
-    },
-    // Delete Access:
-    delete: ({ req: {user} }) => {
-      if (!user) return false; // Only logged in users can delete comments
-      if (user.role === 'admin') return true; // Admins can delete any comment
-      return { author: { equals: user.id } }; // Users can only delete their own comments
-    },
-  },
 }

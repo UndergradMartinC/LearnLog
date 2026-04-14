@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 import type { CollectionConfig, Where } from 'payload'
-=======
-import type { CollectionConfig } from 'payload'
 import { authenticate } from '../lib/auth'
 import { HttpError } from '../lib/errors'
 
@@ -29,6 +26,16 @@ export const Posts: CollectionConfig = {
           { author: { equals: req.user.id } },
         ],
       } as Where
+    },
+    update: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return { author: { equals: user.id } }
+    },
+    delete: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return { author: { equals: user.id } }
     },
   },
   hooks: {
@@ -112,20 +119,6 @@ export const Posts: CollectionConfig = {
       hasMany: true,
     },
   ],
-  access: {
-    read: () => true,
-    create: ({ req: { user } }) => !!user,
-    update: ({ req: { user } }) => {
-      if (!user) return false
-      if (user.role === 'admin') return true
-      return { author: { equals: user.id } }
-    },
-    delete: ({ req: { user } }) => {
-      if (!user) return false
-      if (user.role === 'admin') return true
-      return { author: { equals: user.id } }
-    },
-  },
   endpoints: [
     {
       path: '/:id/like',
