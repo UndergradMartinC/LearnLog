@@ -221,6 +221,7 @@ export interface Post {
   status: 'draft' | 'published';
   publishedAt?: string | null;
   likes?: (number | User)[] | null;
+  dislikes?: (number | User)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -237,7 +238,6 @@ export interface Comment {
    * Set if this comment is a reply to another comment.
    */
   parent?: (number | null) | Comment;
-  likes?: (number | User)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -396,6 +396,7 @@ export interface PostsSelect<T extends boolean = true> {
   status?: T;
   publishedAt?: T;
   likes?: T;
+  dislikes?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -408,7 +409,6 @@ export interface CommentsSelect<T extends boolean = true> {
   author?: T;
   post?: T;
   parent?: T;
-  likes?: T;
   updatedAt?: T;
   createdAt?: T;
 }
