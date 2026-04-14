@@ -7,8 +7,13 @@ dist/
 .next/
 build/
 
-# Payload
+# Payload media uploads
 backend/media/
+
+# Payload generated files (recreated on startup/build)
+backend/src/payload-types.ts
+backend/src/app/(payload)/admin/importMap.js
+backend/migrations/*.json
 
 # Environment variables
 .env
@@ -24,6 +29,21 @@ npm-debug.log*
 # OS artifacts
 .DS_Store
 Thumbs.db
+desktop.ini
+ehthumbs.db
+$RECYCLE.BIN/
+
+# IDE files
+.vscode/
+.idea/
+.vs/
+*.suo
+*.user
+*.iml
 
 # AI documents
 .impeccable.md
+
+# Package manager lock files (pnpm/yarn not used in this project)
+pnpm-lock.yaml
+yarn.lock
