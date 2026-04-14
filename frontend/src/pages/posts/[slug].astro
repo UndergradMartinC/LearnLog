@@ -67,6 +67,7 @@ const title = `${post.title} | LearnLog`;
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>{title}</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -93,6 +94,7 @@ const title = `${post.title} | LearnLog`;
   --color-text:       #2d2d2d;
   --color-text-2:     #5e6278;
   --color-text-muted: #9090a0;
+  --color-accent:     #3d5a78;
 }
 
 body {
@@ -121,26 +123,29 @@ body {
   letter-spacing: -0.01em;
   text-decoration: none;
 }
+.nav-links { display: flex; align-items: center; }
 .nav-links a {
   margin-left: 1.25rem;
   color: var(--color-text-2);
   font-size: var(--text-sm);
   font-weight: 500;
   text-decoration: none;
+  transition: color 0.12s;
 }
+.nav-links a:hover { color: var(--color-text); }
 .logout-btn {
   margin-left: 1.25rem;
-  background: var(--color-text);
-  color: var(--color-surface);
+  background: transparent;
+  color: var(--color-text-muted);
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  padding: 0.5rem 0;
   font-family: var(--font-sans);
   font-size: var(--text-sm);
   font-weight: 500;
   cursor: pointer;
-  letter-spacing: 0.01em;
+  transition: color 0.12s;
 }
+.logout-btn:hover { color: var(--color-text); }
 
 /* Post layout */
 .post-container {
@@ -252,14 +257,8 @@ body {
   color: var(--color-text-2);
   font-style: italic;
 }
-.prose a { color: #2563eb; text-underline-offset: 3px; }
+.prose a { color: var(--color-accent); text-underline-offset: 3px; }
 .prose strong { font-weight: 600; }
-
-.no-body {
-  color: var(--color-text-muted);
-  font-style: italic;
-  font-family: var(--font-serif);
-}
 
 .footer {
   background: #1c1c2a;
@@ -288,7 +287,7 @@ body {
 
 <!-- POST -->
 <article class="post-container">
-  <a href="/dashboard" class="back-link">← All Posts</a>
+  <a href="/dashboard" class="back-link">← Your Posts</a>
 
   <header class="post-header">
     <h1 class="post-title">{post.title}</h1>
@@ -307,10 +306,7 @@ body {
     )}
   </header>
 
-  {bodyHtml
-    ? <div class="prose" set:html={bodyHtml} />
-    : <p class="no-body">No content yet.</p>
-  }
+  {bodyHtml && <div class="prose" set:html={bodyHtml} />}
 </article>
 
 <script>

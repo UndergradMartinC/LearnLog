@@ -25,6 +25,7 @@ const showWelcome = Astro.url.searchParams.get('welcome') === '1';
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>{title}</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -103,16 +104,34 @@ body {
 }
 .logout-btn:hover { color: var(--color-text); }
 
-.posts-section { max-width: 68.75rem; margin: 2.5rem auto; padding: 0 1.5rem; }
+.posts-section { max-width: 68.75rem; margin: 3rem auto; padding: 0 1.5rem; }
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1.75rem;
+}
 .posts-section h1 {
   font-family: var(--font-serif);
   font-size: var(--text-xl);
   font-weight: 600;
   color: var(--color-text);
-  margin-bottom: 1.5rem;
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
+.new-post-btn {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-surface);
+  background: var(--color-text);
+  padding: 0.45rem 1rem;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: opacity 0.12s;
+  flex-shrink: 0;
+}
+.new-post-btn:hover { opacity: 0.8; }
 
 .posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr)); gap: 1.25rem; }
 
@@ -142,11 +161,17 @@ body {
   color: var(--color-text);
   line-height: 1.3;
   letter-spacing: -0.01em;
+  overflow-wrap: break-word;
 }
 .post-deck {
   font-size: var(--text-sm);
   color: var(--color-text-2);
   line-height: 1.65;
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .post-meta {
   font-size: var(--text-sm);
@@ -273,7 +298,10 @@ body {
 
 <!-- DASHBOARD CONTENT -->
 <section class="posts-section">
-  <h1>Recent Posts</h1>
+  <div class="section-header">
+    <h1>Recent Posts</h1>
+    <a href="/posts/new" class="new-post-btn">New Post</a>
+  </div>
   {posts.length === 0 ? (
     <p class="empty-state">No posts yet. <a href="/posts/new">Write your first learning log →</a></p>
   ) : (
@@ -291,7 +319,6 @@ body {
               </div>
             )}
             <div class="post-meta">
-              <span>{post.author?.name ?? post.author?.email ?? 'Unknown'}</span>
               <span class={`badge badge-${post.status}`}>{post.status}</span>
               {(post.publishedAt ?? post.createdAt) && (
                 <span>{new Date(post.publishedAt ?? post.createdAt).toLocaleDateString()}</span>
