@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload';
 
 export const Comments: CollectionConfig = {
   slug: 'comments',
@@ -7,6 +7,17 @@ export const Comments: CollectionConfig = {
   },
   access: {
     create: ({ req }) => Boolean(req.user),
+
+    update: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return { author: { equals: user.id } }
+    },
+    delete: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return { author: { equals: user.id } }
+    },
   },
   hooks: {
     beforeValidate: [
@@ -46,12 +57,6 @@ export const Comments: CollectionConfig = {
       admin: {
         description: 'Set if this comment is a reply to another comment.',
       },
-    },
-    {
-      name: 'likes',
-      type: 'relationship',
-      relationTo: 'users',
-      hasMany: true,
     },
   ],
 }

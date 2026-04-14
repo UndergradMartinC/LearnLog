@@ -1,10 +1,11 @@
 import { PayloadRequest } from 'payload'
+import type { User } from '../payload-types'
 import { Unauthorized, Forbidden } from './errors'
 
 export type AuthContext = {
     id: string
-    role?: string
-    user: any
+    role: string
+    user: User
 }
 
 /**
@@ -16,11 +17,10 @@ export type AuthContext = {
  * Usage: call at the top of any endpoint that requires a logged-in user.
  */
 export async function authenticate(req: PayloadRequest): Promise<AuthContext> {
-    const user = req.user
+    const user = req.user as User | null
     if (!user) throw Unauthorized()
-    // before: const role = user.role || (await req.payload.findByID({ id, collection: 'users' })).role
     const id = String(user.id)
-    const role = user.role || (await req.payload.findByID({ id, collection: 'users' })).role || 'none'
+    const role = user.role ?? 'none'
     return { id, role, user }
 }
 
