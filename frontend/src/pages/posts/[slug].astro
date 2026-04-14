@@ -5,6 +5,8 @@ const cookie = Astro.request.headers.get('cookie') ?? '';
 
 const authRes = await fetch(`${PAYLOAD_URL}/api/users/me`, { headers: { cookie } });
 if (!authRes.ok) return Astro.redirect('/login');
+const meData = await authRes.json();
+const me = meData.user ?? meData;
 
 const postRes = await fetch(
   `${PAYLOAD_URL}/api/posts?where[slug][equals]=${slug}&depth=1`,
@@ -62,6 +64,12 @@ if (typeof post.body === 'string') {
 const postDate = post.publishedAt ?? post.createdAt;
 const authorName = post.author?.name ?? post.author?.email ?? 'Unknown';
 const title = `${post.title} | LearnLog`;
+
+// Reactions initial state
+const likeCount    = (post.likes    ?? []).length;
+const dislikeCount = (post.dislikes ?? []).length;
+const userHasLiked    = (post.likes    ?? []).some((u: any) => (u?.id ?? u) === me.id);
+const userHasDisliked = (post.dislikes ?? []).some((u: any) => (u?.id ?? u) === me.id);
 ---
 
 <html lang="en">
@@ -260,6 +268,147 @@ body {
 .prose a { color: var(--color-accent); text-underline-offset: 3px; }
 .prose strong { font-weight: 600; }
 
+/* ── Reactions ── */
+.reaction-bar {
+  display: flex;
+  gap: 0.625rem;
+  align-items: center;
+  margin: 2rem 0 0;
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--color-border);
+}
+.reaction-btn {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 99px;
+  padding: 0.35rem 1rem;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+  letter-spacing: 0.01em;
+}
+.reaction-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.reaction-btn.active { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+.reaction-error { font-size: var(--text-xs); color: #b91c1c; opacity: 0; transition: opacity 0.2s; margin-left: 0.25rem; }
+.reaction-error.visible { opacity: 1; }
+
+/* ── Comments ── */
+.comments-section {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-border);
+}
+.comments-heading {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+  margin-bottom: 1.5rem;
+}
+.comments-loading {
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-size: var(--text-sm);
+  padding: 0.5rem 0;
+}
+.comment {
+  padding: 1rem 0;
+  border-top: 1px solid var(--color-border);
+}
+#comments-list .comment:first-child { border-top: none; }
+.comment-meta {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  margin-bottom: 0.35rem;
+}
+.comment-author {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-2);
+}
+.comment-date { font-size: var(--text-xs); color: var(--color-text-muted); }
+.comment-body {
+  font-family: var(--font-serif);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  line-height: 1.7;
+  margin-bottom: 0.5rem;
+}
+.reply-btn {
+  background: none;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: color 0.12s;
+}
+.reply-btn:hover { color: var(--color-accent); }
+.comment-replies {
+  padding-left: 1.25rem;
+  border-left: 2px solid var(--color-border);
+  margin-top: 0.75rem;
+}
+.comment-form {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+.comment-form textarea {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  background: var(--color-surface);
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+  line-height: 1.5;
+}
+.comment-form textarea:focus { border-color: var(--color-accent); }
+.comment-submit {
+  align-self: flex-start;
+  background: var(--color-text);
+  color: var(--color-surface);
+  border: none;
+  padding: 0.5rem 1.125rem;
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.comment-submit:hover { opacity: 0.85; }
+.comment-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.reply-form { margin-top: 0.75rem; }
+.reply-form-actions { display: flex; gap: 0.5rem; }
+.cancel-reply {
+  background: none;
+  border: 1px solid var(--color-border);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s;
+}
+.cancel-reply:hover { border-color: var(--color-text-2); color: var(--color-text); }
+
 .footer {
   background: #1c1c2a;
   color: #a8a8b8;
@@ -307,17 +456,254 @@ body {
   </header>
 
   {bodyHtml && <div class="prose" set:html={bodyHtml} />}
+
+  <!-- REACTIONS -->
+  <div class="reaction-bar" id="reaction-bar"
+    data-post-id={post.id}
+    data-liked={String(userHasLiked)}
+    data-disliked={String(userHasDisliked)}>
+    <button class:list={['reaction-btn', userHasLiked && 'active']} id="like-btn"
+      aria-label="Like this post">
+      ↑ <span id="like-count">{likeCount}</span>
+    </button>
+    <button class:list={['reaction-btn', userHasDisliked && 'active']} id="dislike-btn"
+      aria-label="Dislike this post">
+      ↓ <span id="dislike-count">{dislikeCount}</span>
+    </button>
+    <span id="reaction-error" class="reaction-error" aria-live="polite"></span>
+  </div>
+
+  <!-- COMMENTS -->
+  <section class="comments-section" id="comments-section"
+    data-post-id={post.id}
+    data-current-user-id={me.id}>
+    <h2 class="comments-heading">Comments</h2>
+    <div id="comments-list"><p class="comments-loading">Loading…</p></div>
+    <form class="comment-form" id="comment-form">
+      <textarea id="comment-body" placeholder="Leave a comment…" rows="3" required></textarea>
+      <button type="submit" class="comment-submit">Post comment</button>
+    </form>
+  </section>
 </article>
 
 <script>
+  import { fetchPayload } from '../../lib/payload';
   import { signOut } from '../../lib/auth';
 
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('logout-btn')!.addEventListener('click', async () => {
-      await signOut();
-      window.location.href = '/login';
-    });
+  // ── Logout ──
+  document.getElementById('logout-btn')!.addEventListener('click', async () => {
+    await signOut();
+    window.location.href = '/login';
   });
+
+  // ── Reactions ──
+  const bar = document.getElementById('reaction-bar')!;
+  let liked    = bar.dataset.liked    === 'true';
+  let disliked = bar.dataset.disliked === 'true';
+  const postId = bar.dataset.postId!;
+
+  const likeBtn        = document.getElementById('like-btn')!;
+  const dislikeBtn     = document.getElementById('dislike-btn')!;
+  const likeCountEl    = document.getElementById('like-count')!;
+  const dislikeCountEl = document.getElementById('dislike-count')!;
+
+  async function callReaction(field: 'like' | 'dislike', method: 'POST' | 'DELETE') {
+    const data = await fetchPayload<{ likes: number; dislikes: number }>(
+      `/posts/${postId}/${field}`, { method }
+    );
+    likeCountEl.textContent    = String(data.likes);
+    dislikeCountEl.textContent = String(data.dislikes);
+  }
+
+  const reactionError = document.getElementById('reaction-error')!;
+  let reactionErrorTimer: ReturnType<typeof setTimeout> | null = null;
+  function showReactionError() {
+    reactionError.textContent = 'Could not save — try again';
+    reactionError.classList.add('visible');
+    if (reactionErrorTimer) clearTimeout(reactionErrorTimer);
+    reactionErrorTimer = setTimeout(() => reactionError.classList.remove('visible'), 3000);
+  }
+
+  likeBtn.addEventListener('click', async () => {
+    try {
+      await callReaction('like', liked ? 'DELETE' : 'POST');
+      liked = !liked;
+      if (liked) disliked = false;
+      likeBtn.classList.toggle('active', liked);
+      dislikeBtn.classList.toggle('active', disliked);
+    } catch {
+      showReactionError();
+    }
+  });
+
+  dislikeBtn.addEventListener('click', async () => {
+    try {
+      await callReaction('dislike', disliked ? 'DELETE' : 'POST');
+      disliked = !disliked;
+      if (disliked) liked = false;
+      likeBtn.classList.toggle('active', liked);
+      dislikeBtn.classList.toggle('active', disliked);
+    } catch {
+      showReactionError();
+    }
+  });
+
+  // ── Comments ──
+  const section = document.getElementById('comments-section')!;
+  const commentPostId = Number(section.dataset.postId!);
+
+  function escHtml(str: string): string {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function timeAgo(dateStr: string): string {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1)   return 'just now';
+    if (mins < 60)  return `${mins}m ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 30)  return `${days}d ago`;
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function buildTree(flat: any[]): any[] {
+    const map: Record<number, any> = {};
+    const roots: any[] = [];
+    for (const c of flat) map[c.id] = { ...c, replies: [] };
+    for (const c of flat) {
+      const parentId = c.parent?.id ?? c.parent;
+      if (parentId && map[parentId]) map[parentId].replies.push(map[c.id]);
+      else roots.push(map[c.id]);
+    }
+    return roots;
+  }
+
+  function buildCommentEl(c: any, depth: number): HTMLElement {
+    const el = document.createElement('div');
+    el.className = 'comment';
+
+    const author = escHtml(c.author?.name ?? c.author?.email ?? 'Unknown');
+    const body   = escHtml(c.body).replace(/\n/g, '<br>');
+
+    el.innerHTML = `
+      <div class="comment-meta">
+        <span class="comment-author">${author}</span>
+        <span class="comment-date">${timeAgo(c.createdAt)}</span>
+      </div>
+      <div class="comment-body">${body}</div>
+      <button class="reply-btn">Reply</button>
+    `;
+
+    if (c.replies.length > 0) {
+      const repliesEl = document.createElement('div');
+      repliesEl.className = 'comment-replies';
+      const nextDepth = Math.min(depth + 1, 4);
+      for (const r of c.replies) repliesEl.appendChild(buildCommentEl(r, nextDepth));
+      el.appendChild(repliesEl);
+    }
+
+    // Reply button
+    (el.querySelector('.reply-btn') as HTMLButtonElement).addEventListener('click', () => {
+      const existing = el.querySelector('.reply-form');
+      if (existing) { existing.remove(); return; }
+
+      const form = document.createElement('form');
+      form.className = 'comment-form reply-form';
+      form.innerHTML = `
+        <textarea placeholder="Write a reply…" rows="2" required></textarea>
+        <div class="reply-form-actions">
+          <button type="submit" class="comment-submit">Reply</button>
+          <button type="button" class="cancel-reply">Cancel</button>
+        </div>
+      `;
+      form.querySelector('.cancel-reply')!.addEventListener('click', () => form.remove());
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const ta     = form.querySelector('textarea') as HTMLTextAreaElement;
+        const body   = ta.value.trim();
+        if (!body) return;
+        const submit = form.querySelector('.comment-submit') as HTMLButtonElement;
+        submit.disabled = true;
+        try {
+          await fetchPayload('/comments', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ body, post: commentPostId, parent: c.id }),
+          });
+          await loadComments();
+        } catch {
+          submit.disabled = false;
+          const errEl = document.createElement('p');
+          errEl.style.cssText = 'font-size:var(--text-xs);color:#b91c1c;margin-top:0.25rem;';
+          errEl.textContent = 'Failed to post reply — please try again.';
+          form.appendChild(errEl);
+          setTimeout(() => errEl.remove(), 4000);
+        }
+      });
+
+      const repliesEl = el.querySelector('.comment-replies');
+      if (repliesEl) el.insertBefore(form, repliesEl);
+      else el.appendChild(form);
+      (form.querySelector('textarea') as HTMLTextAreaElement).focus();
+    });
+
+    return el;
+  }
+
+  async function loadComments() {
+    const listEl = document.getElementById('comments-list')!;
+    try {
+      const data = await fetchPayload<{ docs: any[]; totalDocs: number }>(
+        `/comments?where[post][equals]=${commentPostId}&depth=1&sort=createdAt&limit=100`
+      );
+      const tree = buildTree(data.docs);
+      listEl.innerHTML = '';
+      if (tree.length === 0) {
+        listEl.innerHTML = '<p class="comments-loading">No comments yet. Be the first!</p>';
+      } else {
+        for (const c of tree) listEl.appendChild(buildCommentEl(c, 0));
+      }
+      const heading = document.querySelector('.comments-heading')!;
+      heading.textContent = `Comments${data.totalDocs > 0 ? ` (${data.totalDocs})` : ''}`;
+    } catch {
+      listEl.innerHTML = '<p class="comments-loading">Failed to load comments.</p>';
+    }
+  }
+
+  const commentForm   = document.getElementById('comment-form')   as HTMLFormElement;
+  const commentBodyEl = document.getElementById('comment-body')   as HTMLTextAreaElement;
+  const commentSubmit = commentForm.querySelector('.comment-submit') as HTMLButtonElement;
+
+  commentForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const body = commentBodyEl.value.trim();
+    if (!body) return;
+    commentSubmit.disabled = true;
+    try {
+      await fetchPayload('/comments', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ body, post: commentPostId }),
+      });
+      commentBodyEl.value = '';
+      await loadComments();
+    } catch {
+      commentSubmit.disabled = false;
+      const errEl = document.createElement('p');
+      errEl.style.cssText = 'font-size:var(--text-xs);color:#b91c1c;margin-top:0.25rem;';
+      errEl.textContent = 'Failed to post comment — please try again.';
+      commentForm.appendChild(errEl);
+      setTimeout(() => errEl.remove(), 4000);
+    }
+  });
+
+  loadComments();
 </script>
 
 </body>

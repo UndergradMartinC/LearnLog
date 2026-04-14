@@ -20,6 +20,7 @@ const title = "Dashboard | LearnLog";
 const showCreated = Astro.url.searchParams.get('created') === '1';
 const showSaved   = Astro.url.searchParams.get('saved')   === '1';
 const showWelcome = Astro.url.searchParams.get('welcome') === '1';
+const postSlug    = Astro.url.searchParams.get('slug') ?? '';
 ---
 
 <html lang="en">
@@ -193,6 +194,8 @@ body {
 .badge-published { background: #ecfdf5; color: #16a34a; }
 .badge-draft     { background: #fefce8; color: #a16207; }
 
+.reaction-counts { color: var(--color-text-muted); font-size: var(--text-xs); }
+
 .post-tags {
   display: flex;
   flex-wrap: wrap;
@@ -241,6 +244,8 @@ body {
   padding: 0.75rem 2.5rem;
   letter-spacing: 0.01em;
 }
+.success-banner a { color: #1a5c3a; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; margin-left: 0.375rem; }
+.saved-banner a    { color: #78350f; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; margin-left: 0.375rem; }
 .welcome-banner {
   background: #f5f2ec;
   border-bottom: 1px solid #ddd8ce;
@@ -285,10 +290,14 @@ body {
 </nav>
 
 {showCreated && (
-  <div class="success-banner" id="success-banner">Post published.</div>
+  <div class="success-banner" id="success-banner">
+    Post published.{postSlug && <a href={`/posts/${postSlug}`}>View it →</a>}
+  </div>
 )}
 {showSaved && (
-  <div class="saved-banner" id="saved-banner">Draft saved.</div>
+  <div class="saved-banner" id="saved-banner">
+    Draft saved.{postSlug && <a href={`/posts/${postSlug}`}>View draft →</a>}
+  </div>
 )}
 {showWelcome && (
   <div class="welcome-banner" id="welcome-banner">
@@ -323,6 +332,9 @@ body {
               {(post.publishedAt ?? post.createdAt) && (
                 <span>{new Date(post.publishedAt ?? post.createdAt).toLocaleDateString()}</span>
               )}
+              {((post.likes?.length ?? 0) > 0 || (post.dislikes?.length ?? 0) > 0) && (
+                <span class="reaction-counts">↑ {post.likes?.length ?? 0} · ↓ {post.dislikes?.length ?? 0}</span>
+              )}
             </div>
           </div>
         </a>
@@ -344,6 +356,7 @@ body {
     url.searchParams.delete('created');
     url.searchParams.delete('saved');
     url.searchParams.delete('welcome');
+    url.searchParams.delete('slug');
     window.history.replaceState({}, '', url.pathname);
 
     for (const id of ['success-banner', 'saved-banner', 'welcome-banner']) {

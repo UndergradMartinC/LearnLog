@@ -7,7 +7,7 @@ if (!meRes.ok) return Astro.redirect('/login');
 const { user } = await meRes.json();
 
 const postsRes = await fetch(
-  `${PAYLOAD_URL}/api/posts?where[author][equals]=${user.id}&sort=-createdAt&limit=5&depth=0`,
+  `${PAYLOAD_URL}/api/posts?where[author][equals]=${user.id}&sort=-createdAt&limit=5&depth=1`,
   { headers: { cookie } }
 );
 const postsData = postsRes.ok ? await postsRes.json() : { docs: [] };
@@ -243,6 +243,8 @@ body {
 .empty-state a { color: var(--color-accent); text-decoration: none; }
 .empty-state a:hover { text-decoration: underline; }
 
+.post-reactions { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 0.2rem; }
+
 .footer {
   background: #1c1c2a;
   color: #a8a8b8;
@@ -312,6 +314,9 @@ body {
           <a href={`/posts/${post.slug}`} class="post-item">
             <div class="post-title">{post.title}</div>
             {post.deck && <div class="post-deck">{post.deck}</div>}
+            {((post.likes?.length ?? 0) > 0 || (post.dislikes?.length ?? 0) > 0) && (
+              <div class="post-reactions">↑ {post.likes?.length ?? 0} · ↓ {post.dislikes?.length ?? 0}</div>
+            )}
           </a>
         ))}
       </div>
