@@ -11,9 +11,7 @@ build/
 backend/media/
 
 # Payload generated files (recreated on startup/build)
-backend/src/payload-types.ts
 backend/src/app/(payload)/admin/importMap.js
-backend/migrations/*.json
 
 # Environment variables
 .env

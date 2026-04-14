@@ -1,4 +1,5 @@
-import type { CollectionConfig, Where } from 'payload'
+import type { CollectionConfig, PayloadRequest, Where } from 'payload'
+import type { Post } from '../payload-types'
 import { authenticate } from '../lib/auth'
 import { HttpError } from '../lib/errors'
 
@@ -8,6 +9,39 @@ function extractIds(arr: unknown[]): number[] {
   return arr.map((u) =>
     typeof u === 'object' && u !== null ? Number((u as Record<string, unknown>).id) : Number(u),
   )
+}
+
+async function toggleReaction(
+  req: PayloadRequest,
+  postId: string,
+  field: 'likes' | 'dislikes',
+  add: boolean,
+): Promise<Response> {
+  const { id: userId } = await authenticate(req)
+  const numericUserId = Number(userId)
+  const opposite = field === 'likes' ? 'dislikes' : 'likes'
+  const post = (await req.payload.findByID({ collection: 'posts', id: postId })) as Post
+
+  let newField = extractIds(post[field] ?? [])
+  let newOpposite = extractIds(post[opposite] ?? [])
+
+  if (add) {
+    if (!newField.includes(numericUserId)) newField.push(numericUserId)
+    newOpposite = newOpposite.filter((id) => id !== numericUserId)
+  } else {
+    newField = newField.filter((id) => id !== numericUserId)
+  }
+
+  const updated = (await req.payload.update({
+    collection: 'posts',
+    id: postId,
+    data: { [field]: newField, [opposite]: newOpposite } as Partial<Post>,
+  })) as Post
+
+  return Response.json({
+    likes: (updated.likes ?? []).length,
+    dislikes: (updated.dislikes ?? []).length,
+  })
 }
 
 export const Posts: CollectionConfig = {
@@ -123,124 +157,38 @@ export const Posts: CollectionConfig = {
     {
       path: '/:id/like',
       method: 'post',
-      handler: async (req) => {
-        try {
-          const { id: userId } = await authenticate(req)
-          const numericUserId = Number(userId)
-          const postId = req.routeParams?.id as string
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const post = (await req.payload.findByID({ collection: 'posts', id: postId })) as any
-
-          const likes: number[] = extractIds(post.likes ?? [])
-          const dislikes: number[] = extractIds(post.dislikes ?? [])
-
-          const newLikes = likes.includes(numericUserId) ? likes : [...likes, numericUserId]
-          const newDislikes = dislikes.filter((id) => id !== numericUserId)
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const updated = (await req.payload.update({
-            collection: 'posts',
-            id: postId,
-            data: { likes: newLikes, dislikes: newDislikes } as any,
-          })) as any
-
-          return Response.json({ likes: (updated.likes ?? []).length, dislikes: (updated.dislikes ?? []).length })
-        } catch (err) {
-          if (err instanceof HttpError) return Response.json({ error: err.message }, { status: err.statusCode })
-          return Response.json({ error: 'Internal server error' }, { status: 500 })
-        }
-      },
+      handler: (req) => toggleReaction(req, req.routeParams?.id as string, 'likes', true).catch(
+        (err) => err instanceof HttpError
+          ? Response.json({ error: err.message }, { status: err.statusCode })
+          : Response.json({ error: 'Internal server error' }, { status: 500 }),
+      ),
     },
     {
       path: '/:id/like',
       method: 'delete',
-      handler: async (req) => {
-        try {
-          const { id: userId } = await authenticate(req)
-          const numericUserId = Number(userId)
-          const postId = req.routeParams?.id as string
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const post = (await req.payload.findByID({ collection: 'posts', id: postId })) as any
-
-          const likes: number[] = extractIds(post.likes ?? [])
-          const dislikes: number[] = extractIds(post.dislikes ?? [])
-
-          const newLikes = likes.filter((id) => id !== numericUserId)
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const updated = (await req.payload.update({
-            collection: 'posts',
-            id: postId,
-            data: { likes: newLikes, dislikes } as any,
-          })) as any
-
-          return Response.json({ likes: (updated.likes ?? []).length, dislikes: (updated.dislikes ?? []).length })
-        } catch (err) {
-          if (err instanceof HttpError) return Response.json({ error: err.message }, { status: err.statusCode })
-          return Response.json({ error: 'Internal server error' }, { status: 500 })
-        }
-      },
+      handler: (req) => toggleReaction(req, req.routeParams?.id as string, 'likes', false).catch(
+        (err) => err instanceof HttpError
+          ? Response.json({ error: err.message }, { status: err.statusCode })
+          : Response.json({ error: 'Internal server error' }, { status: 500 }),
+      ),
     },
     {
       path: '/:id/dislike',
       method: 'post',
-      handler: async (req) => {
-        try {
-          const { id: userId } = await authenticate(req)
-          const numericUserId = Number(userId)
-          const postId = req.routeParams?.id as string
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const post = (await req.payload.findByID({ collection: 'posts', id: postId })) as any
-
-          const likes: number[] = extractIds(post.likes ?? [])
-          const dislikes: number[] = extractIds(post.dislikes ?? [])
-
-          const newDislikes = dislikes.includes(numericUserId) ? dislikes : [...dislikes, numericUserId]
-          const newLikes = likes.filter((id) => id !== numericUserId)
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const updated = (await req.payload.update({
-            collection: 'posts',
-            id: postId,
-            data: { likes: newLikes, dislikes: newDislikes } as any,
-          })) as any
-
-          return Response.json({ likes: (updated.likes ?? []).length, dislikes: (updated.dislikes ?? []).length })
-        } catch (err) {
-          if (err instanceof HttpError) return Response.json({ error: err.message }, { status: err.statusCode })
-          return Response.json({ error: 'Internal server error' }, { status: 500 })
-        }
-      },
+      handler: (req) => toggleReaction(req, req.routeParams?.id as string, 'dislikes', true).catch(
+        (err) => err instanceof HttpError
+          ? Response.json({ error: err.message }, { status: err.statusCode })
+          : Response.json({ error: 'Internal server error' }, { status: 500 }),
+      ),
     },
     {
       path: '/:id/dislike',
       method: 'delete',
-      handler: async (req) => {
-        try {
-          const { id: userId } = await authenticate(req)
-          const numericUserId = Number(userId)
-          const postId = req.routeParams?.id as string
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const post = (await req.payload.findByID({ collection: 'posts', id: postId })) as any
-
-          const likes: number[] = extractIds(post.likes ?? [])
-          const dislikes: number[] = extractIds(post.dislikes ?? [])
-
-          const newDislikes = dislikes.filter((id) => id !== numericUserId)
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const updated = (await req.payload.update({
-            collection: 'posts',
-            id: postId,
-            data: { likes, dislikes: newDislikes } as any,
-          })) as any
-
-          return Response.json({ likes: (updated.likes ?? []).length, dislikes: (updated.dislikes ?? []).length })
-        } catch (err) {
-          if (err instanceof HttpError) return Response.json({ error: err.message }, { status: err.statusCode })
-          return Response.json({ error: 'Internal server error' }, { status: 500 })
-        }
-      },
+      handler: (req) => toggleReaction(req, req.routeParams?.id as string, 'dislikes', false).catch(
+        (err) => err instanceof HttpError
+          ? Response.json({ error: err.message }, { status: err.statusCode })
+          : Response.json({ error: 'Internal server error' }, { status: 500 }),
+      ),
     },
   ],
 }

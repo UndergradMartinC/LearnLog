@@ -7,7 +7,7 @@ export const Comments: CollectionConfig = {
   },
   access: {
     create: ({ req }) => Boolean(req.user),
-    read: ({ req }) => Boolean(req.user),
+
     update: ({ req: { user } }) => {
       if (!user) return false
       if (user.role === 'admin') return true
