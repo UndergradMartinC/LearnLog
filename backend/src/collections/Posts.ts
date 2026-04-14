@@ -12,7 +12,6 @@ function extractIds(arr: unknown[]): number[] {
     typeof u === 'object' && u !== null ? Number((u as Record<string, unknown>).id) : Number(u),
   )
 }
->>>>>>> da05dd1 (Enhance comments and posts collections with access control and dislike functionality)
 
 export const Posts: CollectionConfig = {
   slug: 'posts',

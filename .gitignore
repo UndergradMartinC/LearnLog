@@ -43,11 +43,7 @@ $RECYCLE.BIN/
 
 # AI documents
 .impeccable.md
-<<<<<<< HEAD
-.pnpm-store/
-=======
 
 # Package manager lock files (pnpm/yarn not used in this project)
 pnpm-lock.yaml
 yarn.lock
->>>>>>> da05dd1 (Enhance comments and posts collections with access control and dislike functionality)
