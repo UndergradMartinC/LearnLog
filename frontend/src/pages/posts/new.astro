@@ -92,7 +92,7 @@ if (Astro.request.method === 'POST') {
       });
     }
 
-    return Astro.redirect('/dashboard');
+    return Astro.redirect(`/dashboard?${status === 'published' ? 'created=1' : 'saved=1'}`);
   } catch (err) {
     submitError = err instanceof Error ? err.message : 'Failed to create post. Please try again.';
   }
@@ -119,6 +119,10 @@ if (Astro.request.method === 'POST') {
   --color-border: #e4e2db;
   --color-text: #2d2d2d;
   --color-text-2: #5e6278;
+  --color-text-muted: #9090a0;
+  --color-accent:     #3d5a78;
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
 }
 
 body {
@@ -150,14 +154,17 @@ body {
 }
 .logout-btn {
   margin-left: 1.25rem;
-  background: var(--color-text);
-  color: var(--color-surface);
+  background: transparent;
+  color: var(--color-text-2);
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  padding: 0.5rem 0;
+  font-family: var(--font-sans);
   font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: color 0.12s;
 }
+.logout-btn:hover { color: var(--color-text); }
 
 .page {
   max-width: 42rem;
@@ -230,6 +237,7 @@ textarea { resize: vertical; min-height: 88px; }
   <a href="/dashboard" class="logo">LearnLog</a>
   <div class="nav-links">
     <a href="/dashboard">Dashboard</a>
+    <a href="/profile">Profile</a>
     <button class="logout-btn" id="logout-btn">Logout</button>
   </div>
 </nav>
@@ -268,6 +276,33 @@ textarea { resize: vertical; min-height: 88px; }
     await signOut();
     window.location.href = '/login';
   });
+
+  const DRAFT_KEY = 'learnlog-draft';
+  const titleInput = document.querySelector('input[name="title"]') as HTMLInputElement | null;
+  const deckInput  = document.querySelector('textarea[name="deck"]') as HTMLTextAreaElement | null;
+
+  // Silently restore draft on load if form is empty
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (raw && titleInput && !titleInput.value) {
+      const { title, deck } = JSON.parse(raw) as { title: string; deck: string };
+      if (title) titleInput.value = title;
+      if (deck && deckInput && !deckInput.value) deckInput.value = deck;
+    }
+  } catch {}
+
+  // Autosave on input
+  function autosave() {
+    const title = titleInput?.value ?? '';
+    const deck  = deckInput?.value  ?? '';
+    if (title || deck) {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ title, deck }));
+    } else {
+      localStorage.removeItem(DRAFT_KEY);
+    }
+  }
+  titleInput?.addEventListener('input', autosave);
+  deckInput?.addEventListener('input',  autosave);
 </script>
 
 </body>

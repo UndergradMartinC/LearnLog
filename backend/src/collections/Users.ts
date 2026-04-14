@@ -27,6 +27,14 @@ export const Users: CollectionConfig = {
       type: 'textarea',
     },
     {
+      name: 'major',
+      type: 'text',
+    },
+    {
+      name: 'school',
+      type: 'text',
+    },
+    {
       name: 'role',
       type: 'select',
       options: [
