@@ -33,6 +33,8 @@ export async function getMe(): Promise<unknown> {
 export async function signOut(): Promise<void> {
   try {
     await fetchPayload('/users/logout', { method: 'POST' });
+  } catch {
+    // server session may already be gone — clear locally regardless
   } finally {
     localStorage.removeItem('payload-token');
   }

@@ -9,6 +9,8 @@ const res = await fetch(`${PAYLOAD_URL}/api/users/me`, {
 if (!res.ok) {
   return Astro.redirect('/login');
 }
+const meData = await res.json();
+if (!meData.user?.id) return Astro.redirect('/login');
 
 const postsRes = await fetch(`${PAYLOAD_URL}/api/posts/?depth=1`, {
   headers: { cookie },

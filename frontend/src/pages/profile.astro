@@ -4,7 +4,9 @@ const cookie = Astro.request.headers.get('cookie') ?? '';
 
 const meRes = await fetch(`${PAYLOAD_URL}/api/users/me`, { headers: { cookie } });
 if (!meRes.ok) return Astro.redirect('/login');
-const { user } = await meRes.json();
+const meData = await meRes.json();
+const user = meData.user ?? meData;
+if (!user?.id) return Astro.redirect('/login');
 
 const postsRes = await fetch(
   `${PAYLOAD_URL}/api/posts?where[author][equals]=${user.id}&sort=-createdAt&limit=5&depth=1`,

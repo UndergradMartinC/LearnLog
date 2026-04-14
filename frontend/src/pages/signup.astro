@@ -234,7 +234,7 @@ input:focus {
 </div>
 
 <script>
-  import { signUp } from '../lib/auth';
+  import { signUp, signIn } from '../lib/auth';
 
   const form = document.getElementById('signup-form') as HTMLFormElement;
   const btn  = document.getElementById('submit-btn') as HTMLButtonElement;
@@ -252,6 +252,7 @@ input:focus {
 
     try {
       await signUp({ email, password, name });
+      await signIn({ email, password });
       window.location.href = '/dashboard?welcome=1';
     } catch (err: any) {
       errorMsg.textContent = err?.message ?? 'Something went wrong. Please try again.';
