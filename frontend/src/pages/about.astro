@@ -1,0 +1,533 @@
+---
+import Nav from '../components/Nav.astro';
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About – LearnLog</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #1a1a2e;
+      background: #fff;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #3b5bdb 0%, #7c3aed 100%);
+      color: #fff;
+      text-align: center;
+      padding: 6rem 1.5rem 5rem;
+    }
+
+    .hero h1 {
+      font-size: 2.6rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+
+    .hero p {
+      font-size: 1.05rem;
+      max-width: 540px;
+      margin: 0 auto;
+      opacity: 0.9;
+      line-height: 1.7;
+    }
+
+    /* ── SECTION WRAPPER ── */
+    section { padding: 5rem 1.5rem; }
+
+    .section-label {
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #3b82f6;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 1.9rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      color: #1a1a2e;
+    }
+
+    .section-sub {
+      text-align: center;
+      font-size: 1rem;
+      color: #666;
+      max-width: 520px;
+      margin: 0 auto 3rem;
+      line-height: 1.7;
+    }
+
+    /* ── MISSION ── */
+    .mission { background: #f8f9fc; }
+
+    .mission-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      max-width: 900px;
+      margin: 0 auto;
+      align-items: center;
+    }
+
+    .mission-text h2 {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: #1a1a2e;
+      margin-bottom: 1rem;
+    }
+
+    .mission-text p {
+      color: #555;
+      line-height: 1.8;
+      margin-bottom: 1rem;
+      font-size: 0.97rem;
+    }
+
+    .mission-visual {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .stat-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      border: 1px solid #eee;
+    }
+
+    .stat-card .stat-num {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #3b5bdb;
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 0.25rem;
+    }
+
+    /* ── TEAM ── */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .team-card {
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 14px;
+      padding: 1.75rem 1.25rem;
+      text-align: center;
+    }
+
+    .avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      margin: 0 auto 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .team-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 0.2rem;
+    }
+
+    .team-card .role {
+      font-size: 0.82rem;
+      color: #3b82f6;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+    }
+
+    .team-card p {
+      font-size: 0.82rem;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    /* ── VALUES ── */
+    .values { background: #f8f9fc; }
+
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .value-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid #eee;
+    }
+
+    .value-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+    }
+
+    .value-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #1a1a2e;
+      margin-bottom: 0.5rem;
+    }
+
+    .value-card p {
+      font-size: 0.85rem;
+      color: #666;
+      line-height: 1.65;
+    }
+
+    /* ── TIMELINE ── */
+    .timeline {
+      max-width: 680px;
+      margin: 0 auto;
+      position: relative;
+      padding-left: 2rem;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: #e0e7ff;
+      border-radius: 2px;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 2.25rem;
+    }
+
+    .timeline-item:last-child { margin-bottom: 0; }
+
+    .timeline-dot {
+      position: absolute;
+      left: -1.85rem;
+      top: 6px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #3b5bdb;
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 2px #3b5bdb;
+    }
+
+    .timeline-card {
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .timeline-date {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #3b82f6;
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+
+    .timeline-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-card p {
+      font-size: 0.88rem;
+      color: #555;
+      line-height: 1.7;
+    }
+
+    /* ── CTA ── */
+    .cta {
+      background: linear-gradient(135deg, #1d4ed8 0%, #10b981 100%);
+      color: #fff;
+      text-align: center;
+      padding: 5rem 1.5rem;
+    }
+
+    .cta h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+    }
+
+    .cta p {
+      font-size: 1rem;
+      opacity: 0.9;
+      margin-bottom: 2rem;
+    }
+
+    .cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    .btn-primary {
+      background: #22c55e;
+      color: #fff;
+      border: none;
+      padding: 0.75rem 1.75rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #fff;
+      border: 2px solid rgba(255,255,255,0.7);
+      padding: 0.75rem 1.75rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #0f172a;
+      color: #94a3b8;
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.85rem;
+    }
+
+    footer a { color: #94a3b8; text-decoration: none; margin: 0 0.5rem; }
+    footer a:hover { color: #fff; }
+    footer .footer-bottom { margin-top: 0.5rem; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .mission-grid { grid-template-columns: 1fr; }
+      .team-grid { grid-template-columns: 1fr; }
+      .values-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 1.9rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <Nav />
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>About LearnLog</h1>
+    <p>We're a team of students and developers who believe that documenting what you learn is just as important as learning it.</p>
+  </div>
+
+  <!-- MISSION -->
+  <section class="mission">
+    <div class="mission-grid">
+      <div class="mission-text">
+        <h2>Our Mission</h2>
+        <p>Students don't have a place to share their understanding of classroom material. Existing platforms cater to professionals and experts — which can be intimidating for students still in the learning process.</p>
+        <p>LearnLog is a web app built by UL Lafayette CS students that lets peers create, share, and engage with educational content written at a relatable level. It's part personal learning journal, part peer knowledge exchange.</p>
+        <p>Learning is better together. LearnLog creates a space where students can grow alongside peers who are on the same journey — asking the same questions and figuring things out in real time.</p>
+      </div>
+      <div class="mission-visual">
+        <div class="stat-card">
+          <div class="stat-num">6</div>
+          <div class="stat-label">Team Members</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">9</div>
+          <div class="stat-label">Weeks to Build</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">4</div>
+          <div class="stat-label">Milestones</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">2026</div>
+          <div class="stat-label">Launched</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section>
+    <p class="section-label">The People</p>
+    <h2 class="section-title">Meet the Team</h2>
+    <p class="section-sub">Built by UL Lafayette CS students who wanted a better way to track and share their learning journey.</p>
+
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="avatar" style="background: #0891b2;">MC</div>
+        <h3>Martin C.</h3>
+        <div class="role">Backend & DevOps</div>
+        <p>Developed post management APIs, the search API, and the CI/CD pipeline for production deployment.</p>
+      </div>
+      <div class="team-card">
+        <div class="avatar" style="background: #059669;">MC</div>
+        <h3>Max C.</h3>
+        <div class="role">Backend Engineer</div>
+        <p>Built the like/dislike APIs and co-developed authentication and sign-in infrastructure.</p>
+      </div>
+      <div class="team-card">
+        <div class="avatar" style="background: #3b5bdb;">RJ</div>
+        <h3>Ryann J.</h3>
+        <div class="role">Frontend Engineer</div>
+        <p>Built the home page, user profile, about, and features pages. Led frontend testing.</p>
+      </div>
+      <div class="team-card">
+        <div class="avatar" style="background: #d97706;">CK</div>
+        <h3>Cody K.</h3>
+        <div class="role">Backend Engineer</div>
+        <p>Implemented sign-in functions, RBAC validation, and the follower system.</p>
+      </div>
+      <div class="team-card">
+        <div class="avatar" style="background: #7c3aed;">JP</div>
+        <h3>Jacob P.</h3>
+        <div class="role">Full Stack Engineer</div>
+        <p>Designed the database schema and built APIs for replies, deletes, and social features. Led backend testing.</p>
+      </div>
+      <div class="team-card">
+        <div class="avatar" style="background: #db2777;">RP</div>
+        <h3>Raven P.</h3>
+        <div class="role">Frontend Engineer</div>
+        <p>Built the login, sign-in, view blogs, create blog, dashboard, and search filtering UI.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- VALUES -->
+  <section class="values">
+    <p class="section-label">What We Stand For</p>
+    <h2 class="section-title">Our Values</h2>
+    <p class="section-sub">The principles that guide every decision we make when building LearnLog.</p>
+
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-icon" style="background: #eff6ff;">📖</div>
+        <h3>Learn in Public</h3>
+        <p>Growth happens faster when knowledge is shared. We encourage learners to document and publish their journey openly.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon" style="background: #f0fdf4;">🌱</div>
+        <h3>Consistent Progress</h3>
+        <p>Small, consistent steps compound into massive growth over time. LearnLog is built around daily documentation habits.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon" style="background: #faf5ff;">🤝</div>
+        <h3>Community First</h3>
+        <p>We believe the best learning environments are collaborative. Comments, likes, and shared insights make everyone better.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon" style="background: #fff7ed;">🏆</div>
+        <h3>Own Your Growth</h3>
+        <p>Your learning history is your portfolio. LearnLog gives you full control over how you document and present your journey.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section>
+    <p class="section-label">Our Story</p>
+    <h2 class="section-title">How We Got Here</h2>
+    <p class="section-sub">From a classroom frustration to a platform for learners everywhere.</p>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <span class="timeline-date">Weeks 1 – 2 · Foundation</span>
+          <h3>The Beginning</h3>
+          <p>We set up the GitHub repo, designed the database schema, and built the landing, login, and sign-up pages. Authentication and RBAC validation were implemented so users could securely create accounts and log in.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <span class="timeline-date">Weeks 3 – 5 · Core Features</span>
+          <h3>Building the Platform</h3>
+          <p>We shipped full CRUD APIs for blog posts, a like/dislike system, and a comment and reply feature. On the frontend, the view blogs page, create blog page, user profile pages, and the dashboard all came to life.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <span class="timeline-date">Weeks 6 – 7 · Enhanced Features</span>
+          <h3>Community & Discovery</h3>
+          <p>We added a follower system so users could build a personalized feed, and launched search with topic, author, and date filtering. E2E and integration testing locked in stability across all core user flows.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <span class="timeline-date">Weeks 8 – 9 · Launch</span>
+          <h3>Production Ready</h3>
+          <p>A CI/CD pipeline was set up so every merge to main auto-deploys. After final manual testing, performance tuning, and polish, LearnLog went live — a fully functional platform built start to finish by our team.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta">
+    <h2>Start Your Learning Journey</h2>
+    <p>Join LearnLog and document what you learn every day.</p>
+    <div class="cta-btns">
+      <a href="/signup" class="btn-primary">Create Free Account</a>
+      <a href="/posts" class="btn-secondary">Explore Posts</a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div>© 2026 LearnLog · CMPS 432</div>
+    <div class="footer-bottom">
+      <a href="/about">About</a>
+      <a href="#">Privacy</a>
+      <a href="#">Contact</a>
+    </div>
+  </footer>
+
+</body>
+</html>
