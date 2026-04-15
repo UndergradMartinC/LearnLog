@@ -1,569 +1,524 @@
 ---
+export const prerender = true;
+const title = "Features | LearnLog";
 ---
 
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Features - LearnLog</title>
-  </head>
-  <body>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{title}</title>
 
-    <!-- NAVBAR -->
-    <nav class="navbar">
-      <a href="/" class="logo">LearnLog</a>
-      <div class="nav-links">
-        <a href="/features">Features</a>
-        <a href="/explore">Explore</a>
-        <a href="/about">About</a>
-        <a href="/login">Login</a>
-        <a href="/signup" class="signup-btn">Sign Up</a>
-      </div>
-    </nav>
-
-    <!-- HERO BANNER -->
-    <section class="hero-banner">
-      <h1>Everything You Need To Learn</h1>
-      <p>
-        LearnLog gives students and developers a dedicated space to document,
-        share, and grow their knowledge over time.
-      </p>
-    </section>
-
-    <!-- CORE FEATURES GRID -->
-    <section class="features-section">
-      <h2 class="section-title">Core Features</h2>
-      <p class="section-sub">Everything you need to document your learning journey</p>
-
-      <div class="features-grid">
-
-        <div class="feature-card">
-          <div class="feature-icon icon-blue">📝</div>
-          <h3>WRITE LEARNING LOGS</h3>
-          <p>Create posts documenting what you learn every day. Use a rich editor to add code snippets, images, and formatted notes.</p>
-          <span class="badge badge-blue">Core</span>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon icon-purple">📊</div>
-          <h3>TRACK YOUR PROGRESS</h3>
-          <p>Build a timeline showing your learning journey. Visualize streaks, post frequency, and topics covered over time.</p>
-          <span class="badge badge-purple">Analytics</span>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon icon-teal">🌐</div>
-          <h3>SHARE KNOWLEDGE</h3>
-          <p>Publish insights and help other learners grow. Your posts are discoverable by the entire LearnLog community.</p>
-          <span class="badge badge-green">Community</span>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon icon-coral">💼</div>
-          <h3>BUILD YOUR PORTFOLIO</h3>
-          <p>Show employers how you continuously improve. Your public profile acts as a living portfolio of your learning.</p>
-          <span class="badge badge-blue">Portfolio</span>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon icon-amber">🔍</div>
-          <h3>SEARCH & FILTER POSTS</h3>
-          <p>Find posts by topic, tag, or author. Powerful search lets you discover relevant content quickly across all users.</p>
-          <span class="badge badge-purple">Discovery</span>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon icon-green">💬</div>
-          <h3>LIKE & COMMENT</h3>
-          <p>Every post supports likes and a threaded comment system so learners can discuss ideas and ask questions together.</p>
-          <span class="badge badge-green">Community</span>
-        </div>
-
-      </div>
-    </section>
-
-    <div class="divider"></div>
-
-    <!-- FEATURE SPOTLIGHT -->
-    <section class="spotlight-section">
-      <div class="spotlight-grid">
-
-        <div class="spotlight-text">
-          <h2>Own Your Learning Journey</h2>
-          <p>
-            LearnLog gives you full control over your learning logs. Create
-            drafts, edit anytime, and delete posts you no longer want public.
-          </p>
-          <ul class="check-list">
-            <li>Edit and delete your own posts at any time</li>
-            <li>Tag posts by topic or subject area</li>
-            <li>Choose to publish publicly or keep private</li>
-          </ul>
-        </div>
-
-        <div class="spotlight-demo">
-          <div class="demo-card">
-            <p class="demo-title">Understanding Binary Search Trees</p>
-            <p class="demo-meta">Posted by @alex · 3 days ago</p>
-            <div class="demo-bar filled"></div>
-            <div class="demo-bar" style="width: 45%"></div>
-            <div class="demo-bar" style="width: 80%"></div>
-            <div class="demo-tags">
-              <span class="demo-tag">algorithms</span>
-              <span class="demo-tag">cs fundamentals</span>
-            </div>
-            <div class="demo-stats">
-              <span>👍 24 likes</span>
-              <span>💬 7 comments</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="cta-section">
-      <h2>Start Documenting Your Learning Today</h2>
-      <p>
-        Join other students and developers who are building their knowledge
-        portfolio with LearnLog.
-      </p>
-      <div class="cta-buttons">
-        <a href="/signup" class="btn-primary">Create free account</a>
-        <a href="/explore" class="btn-secondary">Explore posts</a>
-      </div>
-    </section>
-
-    <!-- FOOTER -->
-    <footer class="footer">
-      <p>© 2026 LearnLog · CMPS 432</p>
-      <div class="footer-links">
-        <a href="/about">About</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </footer>
-
-  </body>
-</html>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
 
 <style>
-  *, *::before, *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-serif: 'Lora', Georgia, serif;
+  --font-sans:  'DM Sans', system-ui, sans-serif;
+  --color-bg:         #f7f6f3;
+  --color-surface:    #ffffff;
+  --color-border:     #e4e2db;
+  --color-text:       #2d2d2d;
+  --color-text-2:     #5e6278;
+  --color-text-muted: #9090a0;
+  --color-accent:     #3d5a78;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { text-decoration: none; }
+
+/* ─── NAVBAR ─── */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.125rem 2.5rem;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+.logo {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+.nav-links { display: flex; align-items: center; gap: 1.5rem; }
+.nav-links a {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+  transition: color 0.12s;
+}
+.nav-links a:hover,
+.nav-links a.active { color: var(--color-text); }
+.nav-actions { display: flex; align-items: center; gap: 1rem; }
+.nav-login {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+  transition: color 0.12s;
+}
+.nav-login:hover { color: var(--color-text); }
+.nav-signup {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-surface);
+  background: var(--color-text);
+  padding: 0.45rem 1rem;
+  border-radius: 5px;
+  transition: opacity 0.12s;
+}
+.nav-signup:hover { opacity: 0.8; }
+
+/* ─── HERO ─── */
+.hero {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: clamp(3.5rem, 8vw, 5.5rem) 2.5rem clamp(3rem, 6vw, 4.5rem);
+}
+.hero-inner { max-width: 56rem; margin: 0 auto; }
+.hero-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 1.5rem;
+}
+.hero h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--color-text);
+  max-width: 20ch;
+  margin-bottom: 1.5rem;
+}
+.hero-body {
+  font-size: clamp(1rem, 1.5vw, 1.0625rem);
+  color: var(--color-text-2);
+  line-height: 1.75;
+  max-width: 46ch;
+  margin-bottom: 2rem;
+}
+.hero-actions { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+.btn-primary {
+  display: inline-block;
+  background: var(--color-text);
+  color: var(--color-surface);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  padding: 0.7rem 1.5rem;
+  border-radius: 6px;
+  transition: opacity 0.12s;
+}
+.btn-primary:hover { opacity: 0.8; }
+.btn-secondary {
+  display: inline-block;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+  transition: color 0.12s;
+}
+.btn-secondary:hover { color: var(--color-text); }
+
+/* ─── FEATURES GRID ─── */
+.features {
+  padding: clamp(3rem, 6vw, 5rem) 2.5rem;
+  background: var(--color-bg);
+}
+.features-inner { max-width: 56rem; margin: 0 auto; }
+.section-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 2.5rem;
+}
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--color-border);
+}
+.feature {
+  padding: 2rem 2rem 2rem 0;
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+.feature:nth-child(3n) { border-right: none; padding-right: 0; }
+.feature:nth-last-child(-n+3) { border-bottom: none; }
+.feature-num {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  margin-bottom: 1rem;
+}
+.feature-title {
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+.feature-desc {
+  font-size: 0.875rem;
+  color: var(--color-text-2);
+  line-height: 1.65;
+}
+
+/* ─── SPOTLIGHT ─── */
+.spotlight {
+  padding: clamp(3rem, 6vw, 5rem) 2.5rem;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+.spotlight-inner {
+  max-width: 56rem;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 5fr 4fr;
+  gap: 4.5rem;
+  align-items: start;
+}
+.spotlight-text h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--color-text);
+  line-height: 1.15;
+  margin-bottom: 1rem;
+}
+.spotlight-text p {
+  font-size: 0.9375rem;
+  color: var(--color-text-2);
+  line-height: 1.75;
+  margin-bottom: 1.5rem;
+}
+.check-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.check-list li {
+  font-size: 0.875rem;
+  color: var(--color-text-2);
+  padding-left: 1.25rem;
+  position: relative;
+  line-height: 1.5;
+}
+.check-list li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--color-text-muted);
+}
+
+/* ─── POST PREVIEW ─── */
+.preview {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+.preview-header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.preview-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-border);
+}
+.preview-title-bar {
+  font-family: var(--font-serif);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-left: 0.25rem;
+}
+.preview-posts { padding: 0.875rem; display: flex; flex-direction: column; gap: 0.625rem; }
+.preview-post {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.875rem 1rem;
+}
+.preview-post-title {
+  font-family: var(--font-serif);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
+}
+.preview-post-desc {
+  font-size: 0.75rem;
+  color: var(--color-text-2);
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+.preview-post-meta {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.preview-tag {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 99px;
+  padding: 0.1rem 0.5rem;
+}
+.preview-badge-published {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: #ecfdf5;
+  color: #16a34a;
+}
+.preview-badge-draft {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: #fefce8;
+  color: #a16207;
+}
+.preview-post-draft { opacity: 0.55; }
+
+/* ─── CTA ─── */
+.cta {
+  padding: clamp(3.5rem, 7vw, 5.5rem) 2.5rem;
+  background: var(--color-bg);
+}
+.cta-inner { max-width: 56rem; margin: 0 auto; }
+.cta h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--color-text);
+  max-width: 22ch;
+  margin-bottom: 0.875rem;
+  line-height: 1.15;
+}
+.cta p {
+  font-size: 1rem;
+  color: var(--color-text-2);
+  margin-bottom: 2rem;
+  max-width: 40ch;
+}
+
+/* ─── FOOTER ─── */
+.footer {
+  background: #1c1c2a;
+  color: #7a7a95;
+  padding: 1.75rem 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+}
+.footer-brand {
+  font-family: var(--font-serif);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #c8c8d8;
+}
+
+@media (max-width: 768px) {
+  .spotlight-inner { grid-template-columns: 1fr; }
+  .preview { display: none; }
+}
+@media (max-width: 640px) {
+  .navbar { padding: 1rem 1.25rem; }
+  .hero, .features, .spotlight, .cta { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .features-grid { grid-template-columns: 1fr; }
+  .feature {
+    border-right: none;
+    padding-right: 0;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
   }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color: #111;
-    background: #fff;
-  }
-
-  /* ── Navbar ── */
-  .navbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 40px;
-    background: #fff;
-    border-bottom: 1px solid #e5e7eb;
-  }
-
-  .logo {
-    font-size: 20px;
-    font-weight: 700;
-    color: #2563eb;
-    text-decoration: none;
-  }
-
-  .nav-links {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-  }
-
-  .nav-links a {
-    font-size: 14px;
-    font-weight: 500;
-    color: #555;
-    text-decoration: none;
-  }
-
-  .nav-links a:hover {
-    color: #111;
-  }
-
-  .signup-btn {
-    background: #10b981;
-    color: #fff !important;
-    padding: 7px 16px;
-    border-radius: 6px;
-  }
-
-  .signup-btn:hover {
-    background: #059669;
-  }
-
-  /* ── Hero Banner ── */
-  .hero-banner {
-    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-    padding: 60px 40px;
-    text-align: center;
-    color: #fff;
-  }
-
-  .hero-banner h1 {
-    font-size: 36px;
-    font-weight: 700;
-    margin-bottom: 12px;
-  }
-
-  .hero-banner p {
-    font-size: 15px;
-    opacity: 0.9;
-    max-width: 480px;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
-
-  /* ── Features Section ── */
-  .features-section {
-    padding: 56px 40px;
-    background: #f3f4f6;
-  }
-
-  .section-title {
-    font-size: 36px;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 8px;
-    color: #111;
-  }
-
-  .section-sub {
-    font-size: 14px;
-    color: #6b7280;
-    text-align: center;
-    margin-bottom: 36px;
-  }
-
-  /* strict 2 columns, 3 rows, all cells same height */
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 16px;
-    max-width: 860px;
-    margin: 0 auto;
-    align-items: stretch;
-  }
-
-  .feature-card {
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 28px;
-    display: flex;
-    flex-direction: column;
-    transition: box-shadow 0.2s, border-color 0.2s;
-  }
-
-  .feature-card:hover {
-    border-color: #d1d5db;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  }
-
-  .feature-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    margin-bottom: 16px;
-    flex-shrink: 0;
-  }
-
-  .icon-blue   { background: #dbeafe; }
-  .icon-purple { background: #ede9fe; }
-  .icon-teal   { background: #ccfbf1; }
-  .icon-coral  { background: #fee2e2; }
-  .icon-amber  { background: #fef3c7; }
-  .icon-green  { background: #dcfce7; }
-
-  .feature-card h3 {
-    font-size: 16px;
-    font-weight: 700;
-    color: #111;
-    margin-bottom: 10px;
-    letter-spacing: 0.02em;
-  }
-
-  /* push badge to bottom of card */
-  .feature-card p {
-    font-size: 14px;
-    color: #6b7280;
-    line-height: 1.65;
-    flex-grow: 1;
-  }
-
-  .badge {
-    display: inline-block;
-    font-size: 12px;
-    font-weight: 500;
-    padding: 4px 12px;
-    border-radius: 20px;
-    margin-top: 16px;
-    align-self: flex-start;
-  }
-
-  .badge-blue   { background: #dbeafe; color: #1d4ed8; }
-  .badge-green  { background: #dcfce7; color: #15803d; }
-  .badge-purple { background: #ede9fe; color: #6d28d9; }
-
-  /* ── Divider ── */
-  .divider {
-    height: 1px;
-    background: #e5e7eb;
-    margin: 0 40px;
-  }
-
-  /* ── Spotlight Section ── */
-  .spotlight-section {
-    background: #f9fafb;
-    padding: 56px 40px;
-  }
-
-  .spotlight-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 48px;
-    align-items: center;
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .spotlight-text h2 {
-    font-size: 24px;
-    font-weight: 700;
-    color: #111;
-    margin-bottom: 12px;
-  }
-
-  .spotlight-text p {
-    font-size: 14px;
-    color: #6b7280;
-    line-height: 1.7;
-    margin-bottom: 20px;
-  }
-
-  .check-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .check-list li {
-    font-size: 13px;
-    color: #6b7280;
-    padding-left: 24px;
-    position: relative;
-  }
-
-  .check-list li::before {
-    content: "✓";
-    position: absolute;
-    left: 0;
-    color: #10b981;
-    font-weight: 700;
-  }
-
-  /* ── Demo Card ── */
-  .demo-card {
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 20px;
-  }
-
-  .demo-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #111;
-    margin-bottom: 4px;
-  }
-
-  .demo-meta {
-    font-size: 12px;
-    color: #9ca3af;
-    margin-bottom: 14px;
-  }
-
-  .demo-bar {
-    height: 6px;
-    border-radius: 3px;
-    background: #e5e7eb;
-    margin-bottom: 6px;
-    width: 100%;
-  }
-
-  .demo-bar.filled {
-    background: #10b981;
-    width: 70%;
-  }
-
-  .demo-tags {
-    display: flex;
-    gap: 6px;
-    margin-top: 14px;
-  }
-
-  .demo-tag {
-    font-size: 11px;
-    padding: 2px 10px;
-    border-radius: 20px;
-    background: #ede9fe;
-    color: #6d28d9;
-  }
-
-  .demo-stats {
-    display: flex;
-    gap: 16px;
-    margin-top: 12px;
-    font-size: 12px;
-    color: #9ca3af;
-  }
-
-  /* ── CTA Section ── */
-  .cta-section {
-    padding: 72px 40px;
-    text-align: center;
-  }
-
-  .cta-section h2 {
-    font-size: 28px;
-    font-weight: 700;
-    color: #111;
-    margin-bottom: 10px;
-  }
-
-  .cta-section p {
-    font-size: 14px;
-    color: #6b7280;
-    margin-bottom: 28px;
-  }
-
-  .cta-buttons {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-  }
-
-  .btn-primary {
-    background: #10b981;
-    color: #fff;
-    padding: 10px 24px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: background 0.2s;
-  }
-
-  .btn-primary:hover {
-    background: #059669;
-  }
-
-  .btn-secondary {
-    background: transparent;
-    color: #2563eb;
-    padding: 10px 24px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    border: 1.5px solid #2563eb;
-    transition: background 0.2s;
-  }
-
-  .btn-secondary:hover {
-    background: #eff6ff;
-  }
-
-  /* ── Footer ── */
-  .footer {
-    padding: 20px 40px;
-    border-top: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .footer p {
-    font-size: 12px;
-    color: #9ca3af;
-  }
-
-  .footer-links {
-    display: flex;
-    gap: 16px;
-  }
-
-  .footer-links a {
-    font-size: 12px;
-    color: #9ca3af;
-    text-decoration: none;
-  }
-
-  .footer-links a:hover {
-    color: #6b7280;
-  }
-
-  /* ── Responsive ── */
-  @media (max-width: 768px) {
-    .navbar {
-      padding: 14px 20px;
-    }
-
-    .nav-links {
-      gap: 14px;
-    }
-
-    .hero-banner {
-      padding: 40px 20px;
-    }
-
-    .hero-banner h1 {
-      font-size: 26px;
-    }
-
-    .features-section,
-    .spotlight-section,
-    .cta-section {
-      padding: 40px 20px;
-    }
-
-    .features-grid {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto;
-    }
-
-    .spotlight-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .divider {
-      margin: 0 20px;
-    }
-
-    .footer {
-      flex-direction: column;
-      gap: 12px;
-      padding: 20px;
-    }
-  }
+  .feature:last-child { border-bottom: none; }
+  .footer { flex-direction: column; align-items: flex-start; }
+}
 </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="/" class="logo">LearnLog</a>
+  <div class="nav-links">
+    <a href="/features" class="active">Features</a>
+    <a href="/about">About</a>
+  </div>
+  <div class="nav-actions">
+    <a href="/login" class="nav-login">Sign in</a>
+    <a href="/signup" class="nav-signup">Get started</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <p class="hero-label">What LearnLog does</p>
+    <h1>Everything you need to document your learning.</h1>
+    <p class="hero-body">
+      A focused writing space built for students. Write what you studied,
+      organize it by subject, and watch your knowledge compound into
+      a record worth sharing.
+    </p>
+    <div class="hero-actions">
+      <a href="/signup" class="btn-primary">Create your log</a>
+      <a href="/login" class="btn-secondary">Already have an account →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES GRID -->
+<section class="features">
+  <div class="features-inner">
+    <p class="section-label">Six core capabilities</p>
+    <div class="features-grid">
+      <div class="feature">
+        <p class="feature-num">01</p>
+        <h3 class="feature-title">Write learning logs</h3>
+        <p class="feature-desc">Create posts documenting what you study — the concepts you're working through, the problems you solved, and the things you want to remember.</p>
+      </div>
+      <div class="feature">
+        <p class="feature-num">02</p>
+        <h3 class="feature-title">Tag by subject</h3>
+        <p class="feature-desc">Organize posts by course, topic, or project. Tags are freeform — use your own vocabulary, not a preset list someone else decided on.</p>
+      </div>
+      <div class="feature">
+        <p class="feature-num">03</p>
+        <h3 class="feature-title">Build a portfolio</h3>
+        <p class="feature-desc">Your published logs form a record of how you think and learn — something a transcript alone can't communicate to employers or collaborators.</p>
+      </div>
+      <div class="feature">
+        <p class="feature-num">04</p>
+        <h3 class="feature-title">Autosave drafts</h3>
+        <p class="feature-desc">Start writing and step away. Your draft is saved locally and restored automatically — no lost work when life interrupts a study session.</p>
+      </div>
+      <div class="feature">
+        <p class="feature-num">05</p>
+        <h3 class="feature-title">Publish or keep private</h3>
+        <p class="feature-desc">Share insights publicly with the community, or keep entries as private drafts. You decide what the world sees and when it sees it.</p>
+      </div>
+      <div class="feature">
+        <p class="feature-num">06</p>
+        <h3 class="feature-title">Discover and discuss</h3>
+        <p class="feature-desc">Search posts by topic, tag, or author. Like and comment on peers' entries to ask questions and build on each other's understanding.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SPOTLIGHT -->
+<section class="spotlight">
+  <div class="spotlight-inner">
+    <div class="spotlight-text">
+      <h2>Own your learning history.</h2>
+      <p>
+        Every log you write stays yours. Edit anytime, delete what's no longer
+        relevant, and decide what's public versus private — with no setup required.
+      </p>
+      <ul class="check-list">
+        <li>Edit and delete your own posts at any time</li>
+        <li>Tag posts by topic or subject area</li>
+        <li>Publish publicly or save as a private draft</li>
+        <li>Draft autosave — never lose unfinished work</li>
+        <li>Public profile showing your full learning record</li>
+      </ul>
+    </div>
+    <div class="preview" aria-hidden="true">
+      <div class="preview-header">
+        <div class="preview-dot"></div>
+        <div class="preview-dot"></div>
+        <div class="preview-dot"></div>
+        <span class="preview-title-bar">Dashboard · Recent Posts</span>
+      </div>
+      <div class="preview-posts">
+        <div class="preview-post">
+          <div class="preview-post-title">Understanding Binary Search Trees</div>
+          <div class="preview-post-desc">A deep dive into BST operations and time complexity.</div>
+          <div class="preview-post-meta">
+            <span class="preview-tag">algorithms</span>
+            <span class="preview-tag">cs fundamentals</span>
+            <span class="preview-badge-published">published</span>
+          </div>
+        </div>
+        <div class="preview-post">
+          <div class="preview-post-title">Learning Docker Containers</div>
+          <div class="preview-post-desc">How containers help deploy software consistently.</div>
+          <div class="preview-post-meta">
+            <span class="preview-tag">devops</span>
+            <span class="preview-badge-published">published</span>
+          </div>
+        </div>
+        <div class="preview-post preview-post-draft">
+          <div class="preview-post-title">React hooks — still figuring out useEffect</div>
+          <div class="preview-post-desc">Notes from this afternoon's study session...</div>
+          <div class="preview-post-meta">
+            <span class="preview-tag">react</span>
+            <span class="preview-badge-draft">draft</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="cta-inner">
+    <h2>Start your learning log today.</h2>
+    <p>Free to use. No setup required. Just open it and write.</p>
+    <a href="/signup" class="btn-primary">Create your account</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <span class="footer-brand">LearnLog</span>
+  <span>© 2026 · Built by UL Lafayette CS Students</span>
+</footer>
+
+</body>
+</html>
