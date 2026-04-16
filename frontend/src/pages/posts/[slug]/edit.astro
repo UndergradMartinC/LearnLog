@@ -3,6 +3,7 @@ import TagInput from '../../../components/TagInput.astro';
 import { toSlug } from '../../../lib/tags';
 
 const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/dashboard');
 const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL ?? 'http://localhost:3000';
 const cookie = Astro.request.headers.get('cookie') ?? '';
 
@@ -41,6 +42,28 @@ if (!isAuthor) return Astro.redirect(`/posts/${slug}`);
 
 const initialTags: string[] = (post.tags ?? []).map((t: any) => t.name ?? t).filter(Boolean);
 
+function textToLexical(text: string) {
+  const lines = text.split('\n').filter(l => l.trim().length > 0);
+  const paragraphs = lines.length > 0
+    ? lines.map(line => ({
+        type: 'paragraph', version: 1, format: '', indent: 0, direction: 'ltr',
+        children: [{ type: 'text', version: 1, detail: 0, format: 0, mode: 'normal', style: '', text: line.trim() }],
+      }))
+    : [{ type: 'paragraph', version: 1, format: '', indent: 0, direction: 'ltr', children: [] }];
+  return { root: { type: 'root', version: 1, format: '', indent: 0, direction: 'ltr', children: paragraphs } };
+}
+
+function lexicalToText(lexical: any): string {
+  if (!lexical?.root?.children) return '';
+  return lexical.root.children
+    .map((node: any) =>
+      (node.children ?? []).map((child: any) => child.text ?? '').join('')
+    )
+    .filter(Boolean)
+    .join('\n');
+}
+const initialBody = lexicalToText(post.body);
+
 let submitError = '';
 
 if (Astro.request.method === 'POST') {
@@ -48,6 +71,8 @@ if (Astro.request.method === 'POST') {
     const data = await Astro.request.formData();
     const title = ((data.get('title') as string | null) ?? '').trim();
     const deck = ((data.get('deck') as string | null) ?? '').trim() || undefined;
+    const bodyText = ((data.get('body') as string | null) ?? '').trim();
+    const body = bodyText ? textToLexical(bodyText) : undefined;
     const status: 'draft' | 'published' =
       data.get('status') === 'published' ? 'published' : 'draft';
     const tagNames: string[] = JSON.parse(
@@ -85,7 +110,7 @@ if (Astro.request.method === 'POST') {
     type PatchResponse = { doc: { slug: string } };
     const patched = await payloadFetch<PatchResponse>(`/posts/${post.id}`, {
       method: 'PATCH',
-      body: JSON.stringify({ title, deck, tags: tagIds, status }),
+      body: JSON.stringify({ title, deck, tags: tagIds, status, ...(body ? { body } : {}) }),
     });
 
     return Astro.redirect(`/posts/${patched.doc?.slug ?? slug}`);
@@ -211,6 +236,7 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 0 0 3px var(--color-accent-ring);
 }
 textarea { resize: vertical; min-height: 88px; }
+#post-body { font-family: var(--font-serif); line-height: 1.75; min-height: 15rem; }
 
 .actions {
   display: flex;
@@ -305,15 +331,21 @@ textarea { resize: vertical; min-height: 88px; }
       <span class="field-hint">Shown below your title when browsing posts.</span>
     </label>
 
+    <label>
+      Content
+      <textarea name="body" id="post-body" placeholder="Write your learning log here…">{initialBody}</textarea>
+    </label>
+
     <TagInput hiddenInputId="selected-tags" inputId="post-tag-input" initialTags={initialTags} />
 
     <div class="actions">
       {submitError && <p class="message error" role="alert">{submitError}</p>}
+      <input type="hidden" id="status-hidden" name="status" value={post.status} />
       <div class="actions-row">
         <a href={`/posts/${slug}`} class="cancel-link">Cancel</a>
         <div class="button-row">
-          <button class="button secondary" type="submit" name="status" value="draft">Save draft</button>
-          <button class="button" type="submit" name="status" value="published">Publish</button>
+          <button class="button secondary" type="submit" value="draft">Save draft</button>
+          <button class="button" type="submit" value="published">Publish</button>
         </div>
       </div>
     </div>
@@ -334,7 +366,10 @@ textarea { resize: vertical; min-height: 88px; }
     let lastClickedSubmit: HTMLButtonElement | null = null;
 
     editForm.querySelectorAll<HTMLButtonElement>('button[type="submit"]').forEach((btn) => {
-      btn.addEventListener('click', () => { lastClickedSubmit = btn; });
+      btn.addEventListener('click', () => {
+        lastClickedSubmit = btn;
+        (document.getElementById('status-hidden') as HTMLInputElement).value = btn.value;
+      });
     });
 
     editForm.addEventListener('submit', () => {
