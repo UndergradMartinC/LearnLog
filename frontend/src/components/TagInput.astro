@@ -5,6 +5,7 @@ interface Props {
   inputId?: string;
   placeholder?: string;
   helperText?: string;
+  initialTags?: string[];
 }
 
 const {
@@ -13,12 +14,13 @@ const {
   inputId = 'tag-input',
   placeholder = 'Type a tag and press Enter',
   helperText = 'Press Enter to add each tag. Backspace on empty input removes the last tag.',
+  initialTags = [],
 } = Astro.props;
 ---
 
 <label class="tag-field" data-tag-input>
   {label}
-  <input id={hiddenInputId} name={hiddenInputId} type="hidden" value="[]" />
+  <input id={hiddenInputId} name={hiddenInputId} type="hidden" value={JSON.stringify(initialTags)} />
   <div class="tag-builder">
     <input id={inputId} class="tag-input" type="text" placeholder={placeholder} />
   </div>

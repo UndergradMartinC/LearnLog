@@ -1,0 +1,388 @@
+---
+import TagInput from '../../../components/TagInput.astro';
+import { toSlug } from '../../../lib/tags';
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/dashboard');
+const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL ?? 'http://localhost:3000';
+const cookie = Astro.request.headers.get('cookie') ?? '';
+
+const authRes = await fetch(`${PAYLOAD_URL}/api/users/me`, { headers: { cookie } });
+if (!authRes.ok) return Astro.redirect('/login');
+const meData = await authRes.json();
+const me = meData.user ?? meData;
+
+async function payloadFetch<T>(endpoint: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${PAYLOAD_URL}/api${endpoint}`, {
+    ...init,
+    headers: { 'Content-Type': 'application/json', Cookie: cookie, ...init?.headers },
+  });
+  const body = await res.json();
+  if (!res.ok) {
+    const reason =
+      (Array.isArray(body?.errors) ? body.errors[0]?.message : null) ||
+      body?.message ||
+      res.statusText;
+    throw new Error(`${res.status} ${reason}`);
+  }
+  return body as T;
+}
+
+const postRes = await fetch(
+  `${PAYLOAD_URL}/api/posts?where[slug][equals]=${slug}&depth=1`,
+  { headers: { cookie } }
+);
+if (!postRes.ok) return Astro.redirect('/dashboard');
+const postData = await postRes.json();
+const post = postData.docs?.[0];
+if (!post) return Astro.redirect('/dashboard');
+
+const isAuthor = !!me?.id && me.id === (post.author?.id ?? post.author);
+if (!isAuthor) return Astro.redirect(`/posts/${slug}`);
+
+const initialTags: string[] = (post.tags ?? []).map((t: any) => t.name ?? t).filter(Boolean);
+
+function textToLexical(text: string) {
+  const lines = text.split('\n').filter(l => l.trim().length > 0);
+  const paragraphs = lines.length > 0
+    ? lines.map(line => ({
+        type: 'paragraph', version: 1, format: '', indent: 0, direction: 'ltr',
+        children: [{ type: 'text', version: 1, detail: 0, format: 0, mode: 'normal', style: '', text: line.trim() }],
+      }))
+    : [{ type: 'paragraph', version: 1, format: '', indent: 0, direction: 'ltr', children: [] }];
+  return { root: { type: 'root', version: 1, format: '', indent: 0, direction: 'ltr', children: paragraphs } };
+}
+
+function lexicalToText(lexical: any): string {
+  if (!lexical?.root?.children) return '';
+  return lexical.root.children
+    .map((node: any) =>
+      (node.children ?? []).map((child: any) => child.text ?? '').join('')
+    )
+    .filter(Boolean)
+    .join('\n');
+}
+const initialBody = lexicalToText(post.body);
+
+let submitError = '';
+
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const title = ((data.get('title') as string | null) ?? '').trim();
+    const deck = ((data.get('deck') as string | null) ?? '').trim() || undefined;
+    const bodyText = ((data.get('body') as string | null) ?? '').trim();
+    const body = bodyText ? textToLexical(bodyText) : undefined;
+    const status: 'draft' | 'published' =
+      data.get('status') === 'published' ? 'published' : 'draft';
+    const tagNames: string[] = JSON.parse(
+      (data.get('selected-tags') as string | null) || '[]',
+    );
+
+    type TagDoc = { id: number; name: string; slug: string };
+    type TagsResponse = { docs?: TagDoc[] };
+    const tagIds: number[] = [];
+
+    for (const name of [...new Set(tagNames.map((n) => n.trim()).filter(Boolean))]) {
+      const tagSlug = toSlug(name);
+      if (!tagSlug) continue;
+      let tag: TagDoc | null = null;
+      const found = await payloadFetch<TagsResponse>(
+        `/tags?where[slug][equals]=${encodeURIComponent(tagSlug)}&limit=1`,
+      );
+      tag = found.docs?.[0] ?? null;
+      if (!tag) {
+        try {
+          tag = await payloadFetch<TagDoc>('/tags', {
+            method: 'POST',
+            body: JSON.stringify({ name, slug: tagSlug }),
+          });
+        } catch {
+          const retry = await payloadFetch<TagsResponse>(
+            `/tags?where[slug][equals]=${encodeURIComponent(tagSlug)}&limit=1`,
+          );
+          tag = retry.docs?.[0] ?? null;
+        }
+      }
+      if (tag) tagIds.push(tag.id);
+    }
+
+    type PatchResponse = { doc: { slug: string } };
+    const patched = await payloadFetch<PatchResponse>(`/posts/${post.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ title, deck, tags: tagIds, status, ...(body ? { body } : {}) }),
+    });
+
+    return Astro.redirect(`/posts/${patched.doc?.slug ?? slug}`);
+  } catch (err) {
+    submitError = err instanceof Error ? err.message : 'Failed to update post.';
+  }
+}
+---
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Edit Post | LearnLog</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-serif: 'Lora', Georgia, serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --color-bg: #f7f6f3;
+  --color-surface: #ffffff;
+  --color-border: #e4e2db;
+  --color-text: #2d2d2d;
+  --color-text-2: #5e6278;
+  --color-text-muted: #9090a0;
+  --color-accent:      #3d5a78;
+  --color-accent-ring: rgba(61,90,120,0.08);
+  --color-danger:      #b91c1c;
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+}
+
+body {
+  font-family: var(--font-sans);
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.navbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.125rem 2.5rem;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+.logo {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.nav-links { display: flex; align-items: center; }
+.nav-links a {
+  margin-left: 1.25rem;
+  color: var(--color-text-2);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.12s;
+}
+.nav-links a:hover { color: var(--color-text); }
+.logout-btn {
+  margin-left: 1.25rem;
+  background: transparent;
+  color: var(--color-text-2);
+  border: none;
+  padding: 0.5rem 0;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.12s;
+}
+.logout-btn:hover { color: var(--color-text); }
+
+.page {
+  max-width: 42rem;
+  margin: 3rem auto;
+  padding: 0 1.5rem;
+}
+h1 {
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin-bottom: 2rem;
+}
+
+form {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 2rem;
+  display: grid;
+  gap: 1.25rem;
+}
+label {
+  display: grid;
+  gap: 0.4rem;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-2);
+}
+input, textarea, select {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-ring);
+}
+textarea { resize: vertical; min-height: 88px; }
+#post-body { font-family: var(--font-serif); line-height: 1.75; min-height: 15rem; }
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+.actions-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+.button {
+  background: var(--color-text);
+  color: var(--color-surface);
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.button:hover { opacity: 0.82; }
+.button:disabled { opacity: 0.5; cursor: not-allowed; }
+.button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.button.secondary {
+  background: var(--color-text-2);
+}
+.button-row {
+  display: flex;
+  gap: 0.5rem;
+}
+.message {
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+}
+.error { color: var(--color-danger); }
+.field-hint { font-size: 0.75rem; color: var(--color-text-muted); }
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  margin-bottom: 1.75rem;
+  transition: color 0.12s;
+}
+.back-link:hover { color: var(--color-text-2); }
+.back-link:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; border-radius: 2px; }
+.cancel-link {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color 0.12s;
+}
+.cancel-link:hover { color: var(--color-text-2); }
+.cancel-link:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; border-radius: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  input, textarea, select, .button, .back-link, .cancel-link { transition: none; }
+}
+</style>
+</head>
+
+<body>
+<nav class="navbar">
+  <a href="/dashboard" class="logo">LearnLog</a>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/posts/new">New Post</a>
+    <a href="/profile">Profile</a>
+    <button class="logout-btn" id="logout-btn">Logout</button>
+  </div>
+</nav>
+
+<main class="page">
+  <a href={`/posts/${slug}`} class="back-link">← Back to post</a>
+  <h1>Edit Post</h1>
+
+  <form method="POST">
+    <label>
+      Title
+      <input name="title" type="text" required placeholder="What did you learn today?" maxlength="120" value={post.title} />
+    </label>
+
+    <label>
+      Summary
+      <textarea name="deck" placeholder="One sentence — appears below your title in post cards" maxlength="400">{post.deck ?? ''}</textarea>
+      <span class="field-hint">Shown below your title when browsing posts.</span>
+    </label>
+
+    <label>
+      Content
+      <textarea name="body" id="post-body" placeholder="Write your learning log here…">{initialBody}</textarea>
+    </label>
+
+    <TagInput hiddenInputId="selected-tags" inputId="post-tag-input" initialTags={initialTags} />
+
+    <div class="actions">
+      {submitError && <p class="message error" role="alert">{submitError}</p>}
+      <input type="hidden" id="status-hidden" name="status" value={post.status} />
+      <div class="actions-row">
+        <a href={`/posts/${slug}`} class="cancel-link">Cancel</a>
+        <div class="button-row">
+          <button class="button secondary" type="submit" value="draft">Save draft</button>
+          <button class="button" type="submit" value="published">Publish</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</main>
+
+<script>
+  import { signOut } from '../../../lib/auth';
+
+  document.getElementById('logout-btn')!.addEventListener('click', async () => {
+    await signOut();
+    window.location.href = '/login';
+  });
+
+  // ── Submit loading state ──
+  const editForm = document.querySelector('form') as HTMLFormElement | null;
+  if (editForm) {
+    let lastClickedSubmit: HTMLButtonElement | null = null;
+
+    editForm.querySelectorAll<HTMLButtonElement>('button[type="submit"]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        lastClickedSubmit = btn;
+        (document.getElementById('status-hidden') as HTMLInputElement).value = btn.value;
+      });
+    });
+
+    editForm.addEventListener('submit', () => {
+      editForm.querySelectorAll<HTMLButtonElement>('button[type="submit"]').forEach((btn) => {
+        btn.disabled = true;
+      });
+      if (lastClickedSubmit) {
+        lastClickedSubmit.textContent =
+          lastClickedSubmit.value === 'published' ? 'Publishing…' : 'Saving…';
+      }
+    });
+  }
+</script>
+
+</body>
+</html>

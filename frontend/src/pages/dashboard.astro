@@ -166,6 +166,11 @@ body {
   letter-spacing: -0.01em;
   overflow-wrap: break-word;
 }
+.post-byline {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-top: -0.25rem;
+}
 .post-deck {
   font-size: var(--text-sm);
   color: var(--color-text-2);
@@ -321,6 +326,9 @@ body {
         <a href={`/posts/${post.slug}`} class="post-link">
           <div class="post-card">
             <h2>{post.title}</h2>
+            {(post.author?.name ?? post.author?.email) && (
+              <p class="post-byline">by {post.author?.name ?? post.author?.email}</p>
+            )}
             {post.deck && <p class="post-deck">{post.deck}</p>}
             {Array.isArray(post.tags) && post.tags.length > 0 && (
               <div class="post-tags">
