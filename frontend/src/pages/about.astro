@@ -55,6 +55,7 @@ const title = "About | LearnLog";
       color: var(--color-text);
       letter-spacing: -0.01em;
     }
+    .nav-right  { display: flex; align-items: center; gap: 1.5rem; margin-left: auto; }
     .nav-links { display: flex; align-items: center; gap: 1.5rem; }
     .nav-links a {
       font-size: 0.875rem;
@@ -199,11 +200,11 @@ const title = "About | LearnLog";
       border-top: 1px solid var(--color-border);
     }
     .team-member {
-      padding: 1.75rem 1.75rem 1.75rem 0;
+      padding: 1.75rem;
       border-right: 1px solid var(--color-border);
       border-bottom: 1px solid var(--color-border);
     }
-    .team-member:nth-child(3n) { border-right: none; padding-right: 0; }
+    .team-member:nth-child(3n) { border-right: none; }
     .team-member:nth-last-child(-n+3) { border-bottom: none; }
     .member-initial {
       width: 2.25rem;
@@ -404,13 +405,15 @@ const title = "About | LearnLog";
   <!-- NAVBAR -->
   <nav class="navbar">
     <a href="/" class="logo">LearnLog</a>
-    <div class="nav-links">
-      <a href="/features">Features</a>
-      <a href="/about" class="active">About</a>
-    </div>
-    <div class="nav-actions">
-      <a href="/login" class="nav-login">Sign in</a>
-      <a href="/signup" class="nav-signup">Get started</a>
+    <div class="nav-right">
+      <div class="nav-links">
+        <a href="/features">Features</a>
+        <a href="/about" class="active">About</a>
+      </div>
+      <div class="nav-actions">
+        <a href="/login" class="nav-login">Sign in</a>
+        <a href="/signup" class="nav-signup">Get started</a>
+      </div>
     </div>
   </nav>
 
