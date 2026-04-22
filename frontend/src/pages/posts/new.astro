@@ -25,6 +25,14 @@ async function payloadFetch<T>(endpoint: string, init?: RequestInit): Promise<T>
   return body as T;
 }
 
+const tagsRes = await fetch(`${PAYLOAD_URL}/api/tags`);
+const tagsData = await tagsRes.json();
+
+const availableTags = (tagsData.docs ?? []).map((tag: any) => ({
+  id: tag.id,
+  name: tag.name,
+}));
+
 function textToLexical(text: string) {
   const lines = text.split('\n').filter(l => l.trim().length > 0);
   const paragraphs = lines.length > 0
@@ -60,28 +68,15 @@ if (Astro.request.method === 'POST') {
       const slug = toSlug(name);
       if (!slug) continue;
 
-      let tag: TagDoc | null = null;
+      
       const found = await payloadFetch<TagsResponse>(
         `/tags?where[slug][equals]=${encodeURIComponent(slug)}&limit=1`,
       );
-      tag = found.docs?.[0] ?? null;
+      tag = found.docs?.[0];
 
-      if (!tag) {
-        try {
-          tag = await payloadFetch<TagDoc>('/tags', {
-            method: 'POST',
-            body: JSON.stringify({ name, slug }),
-          });
-        } catch {
-          // Race condition: another request created the same slug first.
-          const retry = await payloadFetch<TagsResponse>(
-            `/tags?where[slug][equals]=${encodeURIComponent(slug)}&limit=1`,
-          );
-          tag = retry.docs?.[0] ?? null;
-        }
-      }
-
-      if (tag) tagIds.push(tag.id);
+      if (tag) {
+        tagIds.push(tag.id);
+       }
     }
 
     // Create post (with slug-conflict retry).
@@ -309,7 +304,11 @@ textarea { resize: vertical; min-height: 88px; }
       <textarea name="body" id="post-body" placeholder="Write your learning log here…"></textarea>
     </label>
 
-    <TagInput hiddenInputId="selected-tags" inputId="post-tag-input" />
+    <TagInput
+        hiddenInputId="selected-tags"
+        inputId="post-tag-input"
+        availableTags={availableTags}
+    />
 
     <div class="actions">
       {submitError && <p class="message error">{submitError}</p>}
