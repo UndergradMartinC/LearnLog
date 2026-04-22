@@ -82,7 +82,15 @@ const {
 
   border: 1px solid var(--color-border);
   border-radius: 999px;
-  padding: 0.55rem 2rem 0.55rem 0.8rem; /* space for arrow */
+
+  
+  padding: 0.25rem 1.6rem 0.25rem 0.6rem;
+  font-size: 0.84rem;
+  line-height: 1.1;
+
+  height: 28px;           
+  min-height: 26px;
+
   background: #f8f8f6;
   font: inherit;
   cursor: pointer;
@@ -181,6 +189,18 @@ document.querySelectorAll('[data-tag-input]').forEach((root) => {
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'tag-chip';
+      const getColorFromId = (id) => {
+        const hue = (id * 137) % 360; // nice distribution
+        return `hsl(${hue}, 70%, 85%)`;
+      };
+
+      const getBorderFromId = (id) => {
+        const hue = (id * 137) % 360;
+        return `hsl(${hue}, 50%, 60%)`;
+      };
+
+      chip.style.backgroundColor = getColorFromId(tagId);
+      chip.style.borderColor = getBorderFromId(tagId);
       chip.title = 'Click to remove';
 
       const text = document.createElement('span');
