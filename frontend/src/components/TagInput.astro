@@ -94,6 +94,7 @@ const {
   background: #f8f8f6;
   font: inherit;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 .tag-select-arrow {
   position: absolute;
@@ -112,6 +113,9 @@ const {
   outline: none;
   border-color: #94a3b8;
   box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.2);
+}
+.tag-select:focus-visible {
+  outline: none;
 }
 
 .tag-select-wrap {
