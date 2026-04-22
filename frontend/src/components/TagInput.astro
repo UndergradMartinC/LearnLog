@@ -5,7 +5,7 @@ interface Props {
   inputId?: string;
   placeholder?: string;
   helperText?: string;
-  initialTags?: string[];
+  initialTags?: number[];
   availableTags?: { id: number; name: string }[];
 }
 
@@ -13,24 +13,41 @@ const {
   label = 'Tags',
   hiddenInputId = 'selected-tags',
   inputId = 'tag-input',
-  placeholder = 'Type a tag and press Enter',
-  helperText = 'Press Enter to add each tag. Backspace on empty input removes the last tag.',
+  placeholder = 'Select a tag',
+  helperText = 'Choose a tag from the list. Click a selected tag to remove it.',
   initialTags = [],
   availableTags = [],
 } = Astro.props;
 ---
 
-<label class="tag-field" data-tag-input>
+<label
+  class="tag-field"
+  data-tag-input
+  data-available-tags={JSON.stringify(availableTags)}
+  data-initial-tags={JSON.stringify(initialTags)}
+>
   {label}
-  <input id={hiddenInputId} name={hiddenInputId} type="hidden" value={JSON.stringify(initialTags)} />
+  <input
+    id={hiddenInputId}
+    name={hiddenInputId}
+    type="hidden"
+    value={JSON.stringify(initialTags)}
+  />
+
   <div class="tag-builder">
-    <select id="tag-select">
-        <option value="">Select a tag</option>
-        {availableTags.map(tag => (
-            <option value={tag.id}>{tag.name}</option>
-        ))}
-    </select>
+    
+    <div class="tag-select-wrap">
+        <select id={inputId} class="tag-select">
+            <option value="">{placeholder}</option>
+            {availableTags.map((tag) => (
+                <option value={tag.id}>{tag.name}</option>
+            ))}
+        </select>
+        <img src="/images/down-arrow.png" class="tag-select-arrow" alt="" />
+    </div>
+    <div class="tag-chip-list" data-tag-chip-list></div>
   </div>
+
   <small class="message">{helperText}</small>
 </label>
 
@@ -49,17 +66,70 @@ const {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
-  cursor: text;
+  align-items: center;
+}
+
+.tag-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.tag-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.55rem 2rem 0.55rem 0.8rem; /* space for arrow */
+  background: #f8f8f6;
+  font: inherit;
+  cursor: pointer;
+}
+.tag-select-arrow {
+  position: absolute;
+  right: 0.6rem;
+  width: 12px;
+  height: 12px;
+  pointer-events: none; /* clicks go through to select */
+  opacity: 0.7;
+}
+.tag-select:hover {
+  background: #f3f3ef;
+  border-color: #cfcbbd;
+}
+
+.tag-select:focus {
+  outline: none;
+  border-color: #94a3b8;
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.2);
+}
+
+.tag-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tag-select-arrow {
+  position: absolute;
+  right: 0.75rem;
+  pointer-events: none;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  line-height: 1;
 }
 
 :global(.tag-chip) {
   display: inline-flex !important;
   align-items: center;
+  gap: 0.4rem;
   background: #cbd6c3;
   color: #2d2d2d;
   border: 1px solid #94a3b8;
-  border-radius: 8px;
-  padding: 0.24rem 0.6rem;
+  border-radius: 999px;
+  padding: 0.32rem 0.7rem;
   font-size: 0.84rem;
   line-height: 1.1;
   white-space: nowrap;
@@ -73,46 +143,67 @@ const {
   line-height: 1.1;
 }
 
-.tag-input {
-  border: none;
-  padding: 0.35rem 0.25rem;
-  min-width: 140px;
-  flex: 1;
+:global(.tag-chip-remove) {
+  font-size: 0.82rem;
+  line-height: 1;
+  opacity: 0.7;
 }
-
-.tag-input:focus {
-  outline: none;
-}
-
 </style>
 
 <script>
 document.querySelectorAll('[data-tag-input]').forEach((root) => {
   const hiddenInput = root.querySelector('input[type="hidden"]');
-  const builder = root.querySelector('.tag-builder');
-  const select = root.querySelector('#tag-select');
+  const chipList = root.querySelector('[data-tag-chip-list]');
+  const select = root.querySelector('.tag-select');
 
-  if (!hiddenInput || !builder || !select) return;
+  if (!hiddenInput || !chipList || !select) return;
 
-  const selectedTags = [];
+  const availableTags = JSON.parse(root.dataset.availableTags || '[]');
+  const initialTags = JSON.parse(root.dataset.initialTags || '[]');
+
+  const selectedTags = Array.isArray(initialTags)
+    ? initialTags.map(Number).filter(Number.isFinite)
+    : [];
 
   const syncHidden = () => {
     hiddenInput.value = JSON.stringify(selectedTags);
   };
 
-  const renderTags = () => {
-    builder.querySelectorAll('.tag-chip').forEach(el => el.remove());
+  const getTagName = (tagId) => {
+    const tag = availableTags.find((t) => Number(t.id) === Number(tagId));
+    return tag ? tag.name : String(tagId);
+  };
 
-    selectedTags.forEach((tag) => {
-      const chip = document.createElement('div');
+  const renderTags = () => {
+    chipList.innerHTML = '';
+
+    selectedTags.forEach((tagId) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
       chip.className = 'tag-chip';
+      chip.title = 'Click to remove';
 
       const text = document.createElement('span');
       text.className = 'tag-chip-label';
-      text.textContent = String(tag);
+      text.textContent = getTagName(tagId);
+
+      const removeMark = document.createElement('span');
+      removeMark.className = 'tag-chip-remove';
+      removeMark.textContent = 'x';
 
       chip.appendChild(text);
-      builder.appendChild(chip);
+      chip.appendChild(removeMark);
+
+      chip.addEventListener('click', () => {
+        const index = selectedTags.indexOf(tagId);
+        if (index > -1) {
+          selectedTags.splice(index, 1);
+          syncHidden();
+          renderTags();
+        }
+      });
+
+      chipList.appendChild(chip);
     });
   };
 

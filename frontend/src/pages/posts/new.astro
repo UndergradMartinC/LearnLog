@@ -53,31 +53,11 @@ if (Astro.request.method === 'POST') {
     const deck = ((data.get('deck') as string | null) ?? '').trim() || undefined;
     const status: 'draft' | 'published' =
       data.get('status') === 'published' ? 'published' : 'draft';
-    const tagNames: string[] = JSON.parse(
-      (data.get('selected-tags') as string | null) || '[]',
+    const tagIds: number[] = JSON.parse(
+        (data.get('selected-tags') as string | null) || '[]',
     );
     const bodyText = ((data.get('body') as string | null) ?? '').trim();
     const body = bodyText ? textToLexical(bodyText) : undefined;
-
-    // Resolve tags: find existing by slug, create if missing.
-    type TagDoc = { id: number; name: string; slug: string };
-    type TagsResponse = { docs?: TagDoc[] };
-    const tagIds: number[] = [];
-
-    for (const name of [...new Set(tagNames.map((n) => n.trim()).filter(Boolean))]) {
-      const slug = toSlug(name);
-      if (!slug) continue;
-
-      
-      const found = await payloadFetch<TagsResponse>(
-        `/tags?where[slug][equals]=${encodeURIComponent(slug)}&limit=1`,
-      );
-      tag = found.docs?.[0];
-
-      if (tag) {
-        tagIds.push(tag.id);
-       }
-    }
 
     // Create post (with slug-conflict retry).
     type PostResponse = { doc: { id: number; slug: string } };
