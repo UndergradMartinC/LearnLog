@@ -45,3 +45,11 @@ $RECYCLE.BIN/
 # Package manager lock files (pnpm/yarn not used in this project)
 pnpm-lock.yaml
 yarn.lock
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+frontend/test-results/

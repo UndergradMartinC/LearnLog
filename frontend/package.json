@@ -6,10 +6,17 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.5",
     "astro": "^5.17.1"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "jsdom": "^28.0.0",
+    "vitest": "^4.1.5"
   }
 }
