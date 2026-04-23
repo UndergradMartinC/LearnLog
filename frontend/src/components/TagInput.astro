@@ -40,7 +40,7 @@ const {
         <select id={inputId} class="tag-select">
             <option value="">{placeholder}</option>
             {availableTags.map((tag) => (
-                <option value={tag.id}>{tag.name}</option>
+                <option value={String(tag.id)}>{tag.name}</option>
             ))}
         </select>
         <img src="/images/down-arrow.png" class="tag-select-arrow" alt="" />
@@ -98,10 +98,10 @@ const {
 }
 .tag-select-arrow {
   position: absolute;
-  right: 0.6rem;
+  right: 0.75rem;
   width: 12px;
   height: 12px;
-  pointer-events: none; /* clicks go through to select */
+  pointer-events: none;
   opacity: 0.7;
 }
 .tag-select:hover {
@@ -122,15 +122,6 @@ const {
   position: relative;
   display: inline-flex;
   align-items: center;
-}
-
-.tag-select-arrow {
-  position: absolute;
-  right: 0.75rem;
-  pointer-events: none;
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-  line-height: 1;
 }
 
 :global(.tag-chip) {
@@ -163,10 +154,10 @@ const {
 </style>
 
 <script>
-document.querySelectorAll('[data-tag-input]').forEach((root) => {
-  const hiddenInput = root.querySelector('input[type="hidden"]');
+document.querySelectorAll<HTMLElement>('[data-tag-input]').forEach((root) => {
+  const hiddenInput = root.querySelector<HTMLInputElement>('input[type="hidden"]');
   const chipList = root.querySelector('[data-tag-chip-list]');
-  const select = root.querySelector('.tag-select');
+  const select = root.querySelector<HTMLSelectElement>('.tag-select');
 
   if (!hiddenInput || !chipList || !select) return;
 
@@ -181,8 +172,8 @@ document.querySelectorAll('[data-tag-input]').forEach((root) => {
     hiddenInput.value = JSON.stringify(selectedTags);
   };
 
-  const getTagName = (tagId) => {
-    const tag = availableTags.find((t) => Number(t.id) === Number(tagId));
+  const getTagName = (tagId: number) => {
+    const tag = availableTags.find((t: { id: number; name: string }) => Number(t.id) === Number(tagId));
     return tag ? tag.name : String(tagId);
   };
 
@@ -193,12 +184,12 @@ document.querySelectorAll('[data-tag-input]').forEach((root) => {
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'tag-chip';
-      const getColorFromId = (id) => {
+      const getColorFromId = (id: number) => {
         const hue = (id * 137) % 360; // nice distribution
         return `hsl(${hue}, 70%, 85%)`;
       };
 
-      const getBorderFromId = (id) => {
+      const getBorderFromId = (id: number) => {
         const hue = (id * 137) % 360;
         return `hsl(${hue}, 50%, 60%)`;
       };
