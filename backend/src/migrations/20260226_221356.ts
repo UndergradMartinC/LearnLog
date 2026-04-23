@@ -2,7 +2,11 @@ import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
-   CREATE TYPE "public"."enum_posts_status" AS ENUM('draft', 'published');
+   DO $$ BEGIN
+    CREATE TYPE "public"."enum_posts_status" AS ENUM('draft', 'published');
+   EXCEPTION
+    WHEN duplicate_object THEN null;
+   END $$;
   CREATE TABLE "users_sessions" (
   	"_order" integer NOT NULL,
   	"_parent_id" integer NOT NULL,

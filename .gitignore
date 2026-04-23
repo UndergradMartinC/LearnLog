@@ -45,3 +45,4 @@ $RECYCLE.BIN/
 # Package manager lock files (pnpm/yarn not used in this project)
 pnpm-lock.yaml
 yarn.lock
+.vercel
