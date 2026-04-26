@@ -1,18 +1,19 @@
 ---
 import TagInput from '../../components/TagInput.astro';
 import { toSlug } from '../../lib/tags';
+import { payloadAuthHeaders } from '../../lib/server-auth';
 
-const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL ?? 'http://localhost:3000';
+const PAYLOAD_URL = import.meta.env.PAYLOAD_BACKEND_URL ?? 'http://localhost:3000';
 const cookie = Astro.request.headers.get('cookie') ?? '';
+const authHeaders = payloadAuthHeaders(cookie);
 
-const authRes = await fetch(`${PAYLOAD_URL}/api/users/me`, { headers: { cookie } });
+const authRes = await fetch(`${PAYLOAD_URL}/api/users/me`, { headers: authHeaders });
 if (!authRes.ok) return Astro.redirect('/login');
 
-// Server-side Payload helper — forwards the browser cookie, no client-side auth needed.
 async function payloadFetch<T>(endpoint: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${PAYLOAD_URL}/api${endpoint}`, {
     ...init,
-    headers: { 'Content-Type': 'application/json', Cookie: cookie, ...init?.headers },
+    headers: { 'Content-Type': 'application/json', ...authHeaders, ...init?.headers },
   });
   const body = await res.json();
   if (!res.ok) {
