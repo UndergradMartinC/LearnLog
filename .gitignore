@@ -46,3 +46,11 @@ $RECYCLE.BIN/
 pnpm-lock.yaml
 yarn.lock
 .vercel
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+frontend/test-results/

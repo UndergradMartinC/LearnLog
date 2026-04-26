@@ -54,13 +54,9 @@ a { text-decoration: none; }
   color: var(--color-text);
   letter-spacing: -0.01em;
 }
-.nav-links { display: flex; align-items: center; gap: 1.5rem; }
-.nav-links a {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-2);
-  transition: color 0.12s;
-}
+.nav-right  { display: flex; align-items: center; gap: 1.5rem; margin-left: auto; }
+.nav-links  { display: flex; align-items: center; gap: 1.5rem; }
+.nav-links a { font-size: 0.875rem; font-weight: 500; color: var(--color-text-2); transition: color 0.12s; }
 .nav-links a:hover { color: var(--color-text); }
 .nav-actions { display: flex; align-items: center; gap: 1rem; }
 .nav-login {
@@ -272,13 +268,15 @@ a { text-decoration: none; }
 <!-- NAVBAR -->
 <nav class="navbar">
   <div class="logo">LearnLog</div>
-  <div class="nav-links">
-    <a href="/features">Features</a>
-    <a href="/about">About</a>
-  </div>
-  <div class="nav-actions">
-    <a href="/login" class="nav-login">Sign in</a>
-    <a href="/signup" class="nav-signup">Get started</a>
+  <div class="nav-right">
+    <div class="nav-links">
+      <a href="/features">Features</a>
+      <a href="/about">About</a>
+    </div>
+    <div class="nav-actions">
+      <a href="/login" class="nav-login">Sign in</a>
+      <a href="/signup" class="nav-signup">Get started</a>
+    </div>
   </div>
 </nav>
 

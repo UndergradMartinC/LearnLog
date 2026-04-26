@@ -3,6 +3,7 @@ import TagInput from '../../../components/TagInput.astro';
 import { toSlug } from '../../../lib/tags';
 import { payloadAuthHeaders } from '../../../lib/server-auth';
 
+
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect('/dashboard');
 const PAYLOAD_URL = import.meta.env.PAYLOAD_BACKEND_URL ?? 'http://localhost:3000';
@@ -42,7 +43,17 @@ if (!post) return Astro.redirect('/dashboard');
 const isAuthor = !!me?.id && me.id === (post.author?.id ?? post.author);
 if (!isAuthor) return Astro.redirect(`/posts/${slug}`);
 
-const initialTags: string[] = (post.tags ?? []).map((t: any) => t.name ?? t).filter(Boolean);
+const tagsRes = await fetch(`${PAYLOAD_URL}/api/tags`);
+const tagsData = await tagsRes.json();
+
+const availableTags = (tagsData.docs ?? []).map((tag: any) => ({
+  id: tag.id,
+  name: tag.name,
+}));
+
+const initialTags: number[] = (post.tags ?? [])
+  .map((t: any) => Number(t?.id ?? t))
+  .filter(Number.isFinite);
 
 function textToLexical(text: string) {
   const lines = text.split('\n').filter(l => l.trim().length > 0);
@@ -77,37 +88,9 @@ if (Astro.request.method === 'POST') {
     const body = bodyText ? textToLexical(bodyText) : undefined;
     const status: 'draft' | 'published' =
       data.get('status') === 'published' ? 'published' : 'draft';
-    const tagNames: string[] = JSON.parse(
-      (data.get('selected-tags') as string | null) || '[]',
+    const tagIds: number[] = JSON.parse(
+        (data.get('selected-tags') as string | null) || '[]',
     );
-
-    type TagDoc = { id: number; name: string; slug: string };
-    type TagsResponse = { docs?: TagDoc[] };
-    const tagIds: number[] = [];
-
-    for (const name of [...new Set(tagNames.map((n) => n.trim()).filter(Boolean))]) {
-      const tagSlug = toSlug(name);
-      if (!tagSlug) continue;
-      let tag: TagDoc | null = null;
-      const found = await payloadFetch<TagsResponse>(
-        `/tags?where[slug][equals]=${encodeURIComponent(tagSlug)}&limit=1`,
-      );
-      tag = found.docs?.[0] ?? null;
-      if (!tag) {
-        try {
-          tag = await payloadFetch<TagDoc>('/tags', {
-            method: 'POST',
-            body: JSON.stringify({ name, slug: tagSlug }),
-          });
-        } catch {
-          const retry = await payloadFetch<TagsResponse>(
-            `/tags?where[slug][equals]=${encodeURIComponent(tagSlug)}&limit=1`,
-          );
-          tag = retry.docs?.[0] ?? null;
-        }
-      }
-      if (tag) tagIds.push(tag.id);
-    }
 
     type PatchResponse = { doc: { slug: string } };
     const patched = await payloadFetch<PatchResponse>(`/posts/${post.id}`, {
@@ -338,8 +321,12 @@ textarea { resize: vertical; min-height: 88px; }
       <textarea name="body" id="post-body" placeholder="Write your learning log here…">{initialBody}</textarea>
     </label>
 
-    <TagInput hiddenInputId="selected-tags" inputId="post-tag-input" initialTags={initialTags} />
-
+    <TagInput
+        hiddenInputId="selected-tags"
+        inputId="post-tag-input"
+        availableTags={availableTags}
+        initialTags={initialTags}
+    />
     <div class="actions">
       {submitError && <p class="message error" role="alert">{submitError}</p>}
       <input type="hidden" id="status-hidden" name="status" value={post.status} />

@@ -5,25 +5,49 @@ interface Props {
   inputId?: string;
   placeholder?: string;
   helperText?: string;
-  initialTags?: string[];
+  initialTags?: number[];
+  availableTags?: { id: number; name: string }[];
 }
 
 const {
   label = 'Tags',
   hiddenInputId = 'selected-tags',
   inputId = 'tag-input',
-  placeholder = 'Type a tag and press Enter',
-  helperText = 'Press Enter to add each tag. Backspace on empty input removes the last tag.',
+  placeholder = 'Select a tag',
+  helperText = 'Choose a tag from the list. Click a selected tag to remove it.',
   initialTags = [],
+  availableTags = [],
 } = Astro.props;
 ---
 
-<label class="tag-field" data-tag-input>
+<label
+  class="tag-field"
+  data-tag-input
+  data-available-tags={JSON.stringify(availableTags)}
+  data-initial-tags={JSON.stringify(initialTags)}
+>
   {label}
-  <input id={hiddenInputId} name={hiddenInputId} type="hidden" value={JSON.stringify(initialTags)} />
+  <input
+    id={hiddenInputId}
+    name={hiddenInputId}
+    type="hidden"
+    value={JSON.stringify(initialTags)}
+  />
+
   <div class="tag-builder">
-    <input id={inputId} class="tag-input" type="text" placeholder={placeholder} />
+    
+    <div class="tag-select-wrap">
+        <select id={inputId} class="tag-select">
+            <option value="">{placeholder}</option>
+            {availableTags.map((tag) => (
+                <option value={String(tag.id)}>{tag.name}</option>
+            ))}
+        </select>
+        <img src="/images/down-arrow.png" class="tag-select-arrow" alt="" />
+    </div>
+    <div class="tag-chip-list" data-tag-chip-list></div>
   </div>
+
   <small class="message">{helperText}</small>
 </label>
 
@@ -42,17 +66,73 @@ const {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
-  cursor: text;
+  align-items: center;
+}
+
+.tag-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.tag-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+
+  
+  padding: 0.25rem 1.6rem 0.25rem 0.6rem;
+  font-size: 0.84rem;
+  line-height: 1.1;
+
+  height: 28px;           
+  min-height: 26px;
+
+  background: #f8f8f6;
+  font: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.tag-select-arrow {
+  position: absolute;
+  right: 0.75rem;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+  opacity: 0.7;
+}
+.tag-select:hover {
+  background: #f3f3ef;
+  border-color: #cfcbbd;
+}
+
+.tag-select:focus {
+  outline: none;
+  border-color: #94a3b8;
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.2);
+}
+.tag-select:focus-visible {
+  outline: none;
+}
+
+.tag-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
 }
 
 :global(.tag-chip) {
   display: inline-flex !important;
   align-items: center;
+  gap: 0.4rem;
   background: #cbd6c3;
   color: #2d2d2d;
   border: 1px solid #94a3b8;
-  border-radius: 8px;
-  padding: 0.24rem 0.6rem;
+  border-radius: 999px;
+  padding: 0.32rem 0.7rem;
   font-size: 0.84rem;
   line-height: 1.1;
   white-space: nowrap;
@@ -66,127 +146,98 @@ const {
   line-height: 1.1;
 }
 
-.tag-input {
-  border: none;
-  padding: 0.35rem 0.25rem;
-  min-width: 140px;
-  flex: 1;
-}
-
-.tag-input:focus {
-  outline: none;
+:global(.tag-chip-remove) {
+  font-size: 0.82rem;
+  line-height: 1;
+  opacity: 0.7;
 }
 </style>
 
 <script>
-  const normalizeTag = (value: string) => value.trim().replace(/\s+/g, ' ');
+document.querySelectorAll<HTMLElement>('[data-tag-input]').forEach((root) => {
+  const hiddenInput = root.querySelector<HTMLInputElement>('input[type="hidden"]');
+  const chipList = root.querySelector('[data-tag-chip-list]');
+  const select = root.querySelector<HTMLSelectElement>('.tag-select');
 
-  const parseTags = (value: string | null): string[] => {
-    if (!value) return [];
-    try {
-      const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed.filter((entry) => typeof entry === 'string') : [];
-    } catch {
-      return [];
-    }
+  if (!hiddenInput || !chipList || !select) return;
+
+  const availableTags = JSON.parse(root.dataset.availableTags || '[]');
+  const initialTags = JSON.parse(root.dataset.initialTags || '[]');
+
+  const selectedTags = Array.isArray(initialTags)
+    ? initialTags.map(Number).filter(Number.isFinite)
+    : [];
+
+  const syncHidden = () => {
+    hiddenInput.value = JSON.stringify(selectedTags);
   };
 
-  document.querySelectorAll<HTMLElement>('[data-tag-input]').forEach((root) => {
-    const hiddenInput = root.querySelector<HTMLInputElement>('input[type="hidden"]');
-    const builder = root.querySelector<HTMLDivElement>('.tag-builder');
-    const input = root.querySelector<HTMLInputElement>('.tag-input');
+  const getTagName = (tagId: number) => {
+    const tag = availableTags.find((t: { id: number; name: string }) => Number(t.id) === Number(tagId));
+    return tag ? tag.name : String(tagId);
+  };
 
-    if (!hiddenInput || !builder || !input) return;
+  const renderTags = () => {
+    chipList.innerHTML = '';
 
-    const selectedTags = parseTags(hiddenInput.value);
+    selectedTags.forEach((tagId) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'tag-chip';
+      const getColorFromId = (id: number) => {
+        const hue = (id * 137) % 360; // nice distribution
+        return `hsl(${hue}, 70%, 85%)`;
+      };
 
-    const syncHidden = () => {
-      hiddenInput.value = JSON.stringify(selectedTags);
-    };
+      const getBorderFromId = (id: number) => {
+        const hue = (id * 137) % 360;
+        return `hsl(${hue}, 50%, 60%)`;
+      };
 
-    const renderTags = () => {
-      builder.querySelectorAll('.tag-chip').forEach((el) => el.remove());
+      chip.style.backgroundColor = getColorFromId(tagId);
+      chip.style.borderColor = getBorderFromId(tagId);
+      chip.title = 'Click to remove';
 
-      selectedTags.forEach((tag) => {
-        const chip = document.createElement('div');
-        chip.className = 'tag-chip';
-        chip.setAttribute('role', 'button');
-        chip.setAttribute('tabindex', '0');
-        chip.setAttribute('aria-label', `Remove tag ${tag}`);
+      const text = document.createElement('span');
+      text.className = 'tag-chip-label';
+      text.textContent = getTagName(tagId);
 
-        const text = document.createElement('span');
-        text.className = 'tag-chip-label';
-        text.textContent = tag;
-        chip.appendChild(text);
+      const removeMark = document.createElement('span');
+      removeMark.className = 'tag-chip-remove';
+      removeMark.textContent = 'x';
 
-        chip.addEventListener('click', () => {
-          const index = selectedTags.findIndex((entry) => entry.toLowerCase() === tag.toLowerCase());
-          if (index >= 0) {
-            selectedTags.splice(index, 1);
-            syncHidden();
-            renderTags();
-          }
-        });
+      chip.appendChild(text);
+      chip.appendChild(removeMark);
 
-        chip.addEventListener('keydown', (event) => {
-          if (event.key !== 'Enter' && event.key !== ' ') return;
-          event.preventDefault();
-          const index = selectedTags.findIndex((entry) => entry.toLowerCase() === tag.toLowerCase());
-          if (index >= 0) {
-            selectedTags.splice(index, 1);
-            syncHidden();
-            renderTags();
-          }
-        });
-
-        builder.insertBefore(chip, input);
-      });
-    };
-
-    const addTag = (rawValue: string) => {
-      const value = normalizeTag(rawValue);
-      if (!value) return;
-
-      const exists = selectedTags.some((tag) => tag.toLowerCase() === value.toLowerCase());
-      if (exists) return;
-
-      selectedTags.push(value);
-      syncHidden();
-      renderTags();
-    };
-
-    input.addEventListener('keydown', (event) => {
-      if (event.key === 'Backspace' && !input.value.trim()) {
-        if (selectedTags.length > 0) {
-          selectedTags.pop();
+      chip.addEventListener('click', () => {
+        const index = selectedTags.indexOf(tagId);
+        if (index > -1) {
+          selectedTags.splice(index, 1);
           syncHidden();
           renderTags();
         }
-        return;
-      }
-
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        addTag(input.value);
-        input.value = '';
-      }
-    });
-
-    builder.addEventListener('click', () => {
-      input.focus();
-    });
-
-    const form = root.closest('form');
-    if (form) {
-      form.addEventListener('submit', () => {
-        if (input.value.trim()) {
-          addTag(input.value);
-          input.value = '';
-        }
       });
+
+      chipList.appendChild(chip);
+    });
+  };
+
+  select.addEventListener('change', () => {
+    const value = select.value;
+    if (!value) return;
+
+    const id = Number(value);
+
+    if (!selectedTags.includes(id)) {
+      selectedTags.push(id);
+      syncHidden();
+      renderTags();
     }
 
-    syncHidden();
-    renderTags();
+    select.value = '';
   });
+
+  syncHidden();
+  renderTags();
+});
 </script>

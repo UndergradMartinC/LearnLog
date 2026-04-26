@@ -54,6 +54,7 @@ a { text-decoration: none; }
   color: var(--color-text);
   letter-spacing: -0.01em;
 }
+.nav-right  { display: flex; align-items: center; gap: 1.5rem; margin-left: auto; }
 .nav-links { display: flex; align-items: center; gap: 1.5rem; }
 .nav-links a {
   font-size: 0.875rem;
@@ -155,11 +156,11 @@ a { text-decoration: none; }
   border-top: 1px solid var(--color-border);
 }
 .feature {
-  padding: 2rem 2rem 2rem 0;
+  padding: 2rem;
   border-right: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
 }
-.feature:nth-child(3n) { border-right: none; padding-right: 0; }
+.feature:nth-child(3n) { border-right: none; }
 .feature:nth-last-child(-n+3) { border-bottom: none; }
 .feature-num {
   font-size: 0.6875rem;
@@ -384,13 +385,15 @@ a { text-decoration: none; }
 <!-- NAVBAR -->
 <nav class="navbar">
   <a href="/" class="logo">LearnLog</a>
-  <div class="nav-links">
-    <a href="/features" class="active">Features</a>
-    <a href="/about">About</a>
-  </div>
-  <div class="nav-actions">
-    <a href="/login" class="nav-login">Sign in</a>
-    <a href="/signup" class="nav-signup">Get started</a>
+  <div class="nav-right">
+    <div class="nav-links">
+      <a href="/features" class="active">Features</a>
+      <a href="/about">About</a>
+    </div>
+    <div class="nav-actions">
+      <a href="/login" class="nav-login">Sign in</a>
+      <a href="/signup" class="nav-signup">Get started</a>
+    </div>
   </div>
 </nav>
 
