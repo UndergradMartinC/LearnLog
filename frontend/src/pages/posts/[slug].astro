@@ -1,16 +1,19 @@
 ---
-const { slug } = Astro.params;
-const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL ?? 'http://localhost:3000';
-const cookie = Astro.request.headers.get('cookie') ?? '';
+import { payloadAuthHeaders } from '../../lib/server-auth';
 
-const authRes = await fetch(`${PAYLOAD_URL}/api/users/me`, { headers: { cookie } });
+const { slug } = Astro.params;
+const PAYLOAD_URL = import.meta.env.PAYLOAD_BACKEND_URL ?? 'http://localhost:3000';
+const cookie = Astro.request.headers.get('cookie') ?? '';
+const authHeaders = payloadAuthHeaders(cookie);
+
+const authRes = await fetch(`${PAYLOAD_URL}/api/users/me`, { headers: authHeaders });
 if (!authRes.ok) return Astro.redirect('/login');
 const meData = await authRes.json();
 const me = meData.user ?? meData;
 
 const postRes = await fetch(
   `${PAYLOAD_URL}/api/posts?where[slug][equals]=${slug}&depth=1`,
-  { headers: { cookie } }
+  { headers: authHeaders }
 );
 if (!postRes.ok) return Astro.redirect('/dashboard');
 const postData = await postRes.json();
