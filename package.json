@@ -29,8 +29,5 @@
   "bugs": {
     "url": "https://github.com/UndergradMartinC/LearnLog/issues"
   },
-  "homepage": "https://github.com/UndergradMartinC/LearnLog#readme",
-  "dependencies": {
-    "@astrojs/vercel": "^10.0.4"
-  }
+  "homepage": "https://github.com/UndergradMartinC/LearnLog#readme"
 }

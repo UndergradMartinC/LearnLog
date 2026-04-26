@@ -4,6 +4,7 @@ import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
+import type { SharpDependency } from 'payload'
 
 import { Comments } from './collections/Comments'
 import { Media } from './collections/Media'
@@ -40,7 +41,7 @@ export default buildConfig({
       ssl: { rejectUnauthorized: false },
     },
   }),
-  sharp,
+  sharp: sharp as unknown as SharpDependency,
   cors: [serverURL, frontendURL],
   // Origins allowed to send cookie-based auth; must include serverURL (sanitizer also appends serverURL when non-empty).
   csrf: [serverURL, frontendURL],
